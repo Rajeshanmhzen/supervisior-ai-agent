@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("MASTER_DATABASE_URL")
+}
+
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum FileStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum EmailStatus {
+  PENDING
+  SEND
+  FAILED
+  RESENDING
+}
+
+model User {
+  id             String   @id @default(uuid())
+  fullName       String
+  email          String   @unique
+  passwordHash   String
+  role           Role     @default(USER)
+
+  profilePic     String?
+  isVerified     Boolean  @default(false)
+
+  failedAttempts Int      @default(0)
+  lockUntil      DateTime?
+
+  lastLoginAt    DateTime?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
+  verificationTokens   VerificationToken[]
+  uploads              FileUpload[]
+}
+
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  revokedAt DateTime?
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+
+
+model FileUpload {
+  id            String     @id @default(uuid())
+
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  originalName  String
+  storedName    String
+  mimeType      String
+  size          Int
+  path          String
+
+  semester      String   @default("UNKNOWN")
+  university    String   @default("UNKNOWN")
+
+  status        FileStatus @default(UPLOADED)
+  progress      Int        @default(0)
+
+  // analysis output (AI / processing result)
+  analysisResult Json?
+  errorMessage   String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+
+
+model EmailLog {
+  id        String   @id @default(uuid())
+  email     String
+  type      String   // RESET, VERIFY
+  status    EmailStatus @default(PENDING)
+  createdAt DateTime @default(now())
+}

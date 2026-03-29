@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+@theme {
+  --color-on-primary-fixed: #00174b;
+  --color-inverse-on-surface: #f0f1f3;
+  --color-on-tertiary-fixed-variant: #7d2d00;
+  --color-primary-fixed: #dbe1ff;
+  --color-on-secondary-container: #fffbff;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-on-tertiary: #ffffff;
+  --color-surface-tint: #0053db;
+  --color-surface-container: #edeef0;
+  --color-error-container: #ffdad6;
+  --color-on-tertiary-fixed: #360f00;
+  --color-on-tertiary-container: #ffede6;
+  --color-primary-container: #2563eb;
+  --color-on-surface: #191c1e;
+  --color-surface-container-high: #e7e8ea;
+  --color-on-error: #ffffff;
+  --color-inverse-surface: #2e3132;
+  --color-on-secondary: #ffffff;
+  --color-tertiary-fixed: #ffdbcd;
+  --color-tertiary: #943700;
+  --color-on-error-container: #93000a;
+  --color-inverse-primary: #b4c5ff;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-surface-dim: #d9dadc;
+  --color-tertiary-fixed-dim: #ffb596;
+  --color-surface-container-highest: #e1e2e4;
+  --color-on-primary: #ffffff;
+  --color-secondary-container: #8a4cfc;
+  --color-surface: #f8f9fb;
+  --color-on-primary-container: #eeefff;
+  --color-primary: #004ac6;
+  --color-on-surface-variant: #434655;
+  --color-background: #f8f9fb;
+  --color-surface-variant: #e1e2e4;
+  --color-surface-container-lowest: #ffffff;
+  --color-secondary: #712ae2;
+  --color-surface-container-low: #f3f4f6;
+  --color-on-secondary-fixed-variant: #5a00c6;
+  --color-outline-variant: #c3c6d7;
+  --color-secondary-fixed-dim: #d2bbff;
+  --color-surface-bright: #f8f9fb;
+  --color-error: #ba1a1a;
+  --color-on-background: #191c1e;
+  --color-secondary-fixed: #eaddff;
+  --color-tertiary-container: #bc4800;
+  --color-on-secondary-fixed: #25005a;
+  --color-outline: #737686;
+
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+}
+
+.font-headline {
+  font-family: var(--font-headline);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-label {
+  font-family: var(--font-label);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* input field  */
+.inputBox {
+  position: relative;
+  width: 100%;
+}
+
+.inputBox input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-outline);
+  border-radius: 8px;
+  outline: none;
+  font-size: 1em;
+}
+
+.inputBox label{
+  position: absolute;
+  left: 0;
+  padding: 10px;
+  pointer-events: none;
+  font-size: 1em;
+  font-weight: 300;
+  text-transform: none;
+  background-color: transparent;
+  transition: transform 0.25s ease, font-size 0.25s ease, color 0.25s ease, padding 0.25s ease, background-color 0s 0.25s;
+  will-change: transform, font-size;
+}
+
+.inputBox input:focus {
+  border-color: var(--color-primary);
+}
+
+.inputBox input:not(:placeholder-shown) ~ label,
+.inputBox input:-webkit-autofill ~ label {
+  transform: translateX(10px) translateY(-8px);
+  font-size: 0.65em;
+  font-weight: 400;
+  color: var(--color-outline);
+  padding: 0 10px;
+  z-index: 1111;
+  /* background-color: #ffff; */
+}
+
+.inputBox input:focus ~ label {
+  transform: translateX(10px) translateY(-8px);
+  font-size: 0.65em;
+  font-weight: 400;
+  color: var(--color-primary);
+  padding: 0 10px;
+  z-index: 1111;
+  background-color: #ffff;
+}

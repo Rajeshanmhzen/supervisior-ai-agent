@@ -1,0 +1,1 @@
+# Add python dependencies here when you wire real AI (e.g. openai)
