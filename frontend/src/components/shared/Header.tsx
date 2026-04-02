@@ -95,10 +95,19 @@ const Header = () => {
             }
           }}
             unstyled
-            className="px-6 py-2.5 rounded-full font-headline text-sm font-bold bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all duration-200"
+            className="px-6 py-2.5 rounded-full font-headline text-sm font-bold bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
           >
             {isAuthed ? 'Logout' : 'Sign In'}
           </Button>
+          {isAuthed && (
+            <Button
+              onClick={() => navigate('/dashboard')}
+              unstyled
+              className="px-6 py-2.5 rounded-full font-headline text-sm font-bold border border-primary text-primary hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
+            >
+              Dashboard
+            </Button>
+          )}
         </div>
         </div>
       </div>

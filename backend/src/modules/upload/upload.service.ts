@@ -3,7 +3,7 @@ import fs from 'fs';
 import { promises as fsp } from 'fs';
 import { pipeline } from 'stream/promises';
 import { FastifyInstance } from 'fastify';
-import { randomToken } from '../../common/utils/crypto';
+import { randomToken } from '../../utils/crypto';
 import { uploadRepository } from './upload.repository';
 import { fileQueue } from '../processing/queue';
 import { logger } from '../../utils/logger';

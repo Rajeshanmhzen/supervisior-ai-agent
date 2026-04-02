@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 type InputFieldProps = {
   label: string
@@ -21,18 +21,36 @@ const InputField = ({
   onChange,
   rightAdornment,
 }: InputFieldProps) => {
+  const [isFocused, setIsFocused] = useState(false)
+  const [hasValue, setHasValue] = useState(false)
+  const isFloated = isFocused || hasValue || (value !== undefined && value !== '')
+
   return (
     <div className="inputBox">
       <input
         type={type}
         value={value}
         required={required}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(e) => {
+          onChange?.(e.target.value)
+          setHasValue(e.target.value !== '')
+        }}
+        onFocus={() => setIsFocused(true)}
+        onBlur={(e) => {
+          setIsFocused(false)
+          setHasValue(e.target.value !== '')
+        }}
         name={name}
         placeholder=" "
         style={rightAdornment ? { paddingRight: "2.5rem" } : undefined}
       />
-      <label htmlFor={name} className="labelline">{label}</label>
+      <label
+        htmlFor={name}
+        className="labelline"
+        style={{ backgroundColor: isFloated ? '#fff' : 'transparent' }}
+      >
+        {label}
+      </label>
       {rightAdornment && (
         <div className="absolute right-2 top-1/2 -translate-y-1/2">
           {rightAdornment}

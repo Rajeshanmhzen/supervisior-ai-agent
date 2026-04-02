@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import { FastifyInstance } from 'fastify';
 import { authRepository } from './auth.repository';
-import { hashToken, randomNumericCode, randomToken } from '../common/utils/crypto';
-import { signAccessToken } from '../common/utils/jwt';
+import { hashToken, randomNumericCode, randomToken } from '../utils/crypto';
+import { signAccessToken } from '../utils/jwt';
 import { SignOptions } from 'jsonwebtoken';
 import { Role } from '@prisma/client';
 const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 30);
