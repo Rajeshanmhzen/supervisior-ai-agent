@@ -112,6 +112,7 @@ const RegisterPage = () => {
       });
       authStorage.setAccessToken(result.accessToken);
       authStorage.setUser(result.user);
+      if (result.refreshToken) authStorage.setRefreshToken(result.refreshToken);
       notifications.show({
         title: 'Account created',
         message: 'Registration successful',

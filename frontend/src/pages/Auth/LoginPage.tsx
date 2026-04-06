@@ -88,6 +88,7 @@ const LoginPage = () => {
         });
         authStorage.setAccessToken(result.accessToken);
         authStorage.setUser(result.user);
+        if (result.refreshToken) authStorage.setRefreshToken(result.refreshToken);
         notifications.show({
           title: 'Welcome back',
           message: 'Login successful',
