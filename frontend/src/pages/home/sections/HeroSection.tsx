@@ -1,13 +1,30 @@
-import { motion } from "framer-motion";
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+type Ripple = { id: number; x: number; y: number }
+
+const useRipple = () => {
+  const [ripples, setRipples] = useState<Ripple[]>([])
+  const trigger = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const id = Date.now()
+    setRipples((p) => [...p, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }])
+    setTimeout(() => setRipples((p) => p.filter((r) => r.id !== id)), 600)
+  }
+  return { ripples, trigger }
+}
 
 const HeroSection = () => {
+  const primary = useRipple()
+  const ghost = useRipple()
+
   return (
     <motion.section
       className="relative overflow-hidden pt-24 pb-32"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: false, amount: 0.2 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: 'easeOut' as const }}
     >
       <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7 z-10">
@@ -22,12 +39,48 @@ const HeroSection = () => {
             against BCA Nepal guidelines before your formal submission.
           </p>
           <div className="flex flex-wrap gap-4">
-            <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline font-bold text-lg shadow-xl shadow-primary/20 active:scale-95 transition-all duration-300">
+            <motion.button
+              className="relative overflow-hidden px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline font-bold text-lg shadow-xl shadow-primary/20 transition-colors"
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              onClick={primary.trigger}
+            >
+              <AnimatePresence>
+                {primary.ripples.map((r) => (
+                  <motion.span
+                    key={r.id}
+                    className="absolute rounded-full bg-white/30 pointer-events-none"
+                    style={{ left: r.x, top: r.y, translateX: '-50%', translateY: '-50%' }}
+                    initial={{ width: 0, height: 0, opacity: 0.6 }}
+                    animate={{ width: 220, height: 220, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: 'easeOut' as const }}
+                  />
+                ))}
+              </AnimatePresence>
               Upload Project
-            </button>
-            <button className="px-8 py-4 rounded-xl text-primary font-headline font-bold text-lg hover:bg-surface-container-high transition-all duration-300">
+            </motion.button>
+            <motion.button
+              className="relative overflow-hidden px-8 py-4 rounded-xl text-primary font-headline font-bold text-lg hover:bg-surface-container-high transition-colors"
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              onClick={ghost.trigger}
+            >
+              <AnimatePresence>
+                {ghost.ripples.map((r) => (
+                  <motion.span
+                    key={r.id}
+                    className="absolute rounded-full bg-primary/10 pointer-events-none"
+                    style={{ left: r.x, top: r.y, translateX: '-50%', translateY: '-50%' }}
+                    initial={{ width: 0, height: 0, opacity: 0.6 }}
+                    animate={{ width: 220, height: 220, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: 'easeOut' as const }}
+                  />
+                ))}
+              </AnimatePresence>
               Learn More
-            </button>
+            </motion.button>
           </div>
         </div>
         <div className="lg:col-span-5 relative">
@@ -56,7 +109,7 @@ const HeroSection = () => {
       </div>
       <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-secondary/5 rounded-full blur-3xl -z-10"></div>
     </motion.section>
-  );
-};
+  )
+}
 
-export default HeroSection;
+export default HeroSection

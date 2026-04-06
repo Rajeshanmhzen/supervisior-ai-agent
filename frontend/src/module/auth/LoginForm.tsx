@@ -1,70 +1,55 @@
-import { useRef, useState } from "react";
-import InputField from "../../components/shared/InputField";
+import { useState } from 'react'
+import InputField from '../../components/shared/InputField'
+import AnimatedButton from '../../components/shared/AnimatedButton'
+
 interface LoginFormProps {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  onEmailChange?: (value: string) => void;
-  onPasswordChange?: (value: string) => void;
-  onSubmit?: () => void;
-  isLoading?: boolean;
-  error?: string;
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  confirmPassword: string
+  onEmailChange?: (value: string) => void
+  onPasswordChange?: (value: string) => void
+  onSubmit?: () => void
+  isLoading?: boolean
+  error?: string
   fieldErrors?: {
-    email?: string;
-    password?: string;
-  };
+    email?: string
+    password?: string
+  }
 }
+
 const LoginForm = (props: LoginFormProps) => {
-  const {
-    email,
-    password,
-    onEmailChange,
-    onPasswordChange,
-    onSubmit,
-    isLoading,
-    error,
-    fieldErrors,
-  } = props;
-  const [showPassword, setShowPassword] = useState(false);
-  const submitClickedRef = useRef(false);
+  const { email, password, onEmailChange, onPasswordChange, onSubmit, isLoading, error, fieldErrors } = props
+  const [showPassword, setShowPassword] = useState(false)
+
   return (
     <form
       className="flex flex-col gap-4"
       noValidate
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (submitClickedRef.current) {
-          submitClickedRef.current = false;
-          return;
-        }
-        onSubmit?.();
-      }}
+      onSubmit={(e) => { e.preventDefault(); onSubmit?.() }}
     >
       <div className="space-y-1">
         <InputField label="Email Address" name="email" type="email" value={email} onChange={onEmailChange} />
-        {fieldErrors?.email && (
-          <span className="text-[10px] text-red-500">{fieldErrors.email}</span>
-        )}
+        {fieldErrors?.email && <span className="text-[10px] text-red-500">{fieldErrors.email}</span>}
       </div>
       <InputField
         label="Password"
         name="password"
         value={password}
-        type={showPassword ? "text" : "password"}
+        type={showPassword ? 'text' : 'password'}
         onChange={onPasswordChange}
         rightAdornment={
-          <button
+          <AnimatedButton
             type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className={`text-on-surface-variant transition-all duration-200 ease-out ${password && password.length > 1 ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"}`}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((p) => !p)}
+            className={`text-on-surface-variant transition-all duration-200 ease-out ${password && password.length > 1 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}
+            rippleColor="bg-primary/10"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 3l18 18" />
-                <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                <path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
                 <path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c5.5 0 9.6 3.6 11 8-0.5 1.6-1.4 3-2.5 4.1" />
                 <path d="M6.1 6.1C4 7.6 2.5 9.7 2 12c1.4 4.4 5.5 8 10 8 1.2 0 2.3-0.2 3.4-0.6" />
               </svg>
@@ -74,54 +59,55 @@ const LoginForm = (props: LoginFormProps) => {
                 <circle cx="12" cy="12" r="3.5" />
               </svg>
             )}
-          </button>
+          </AnimatedButton>
         }
       />
-      {fieldErrors?.password && (
-        <span className="text-[10px] text-red-500">{fieldErrors.password}</span>
-      )}
+      {fieldErrors?.password && <span className="text-[10px] text-red-500">{fieldErrors.password}</span>}
       <div className="flex items-center justify-between text-[10px] font-semibold tracking-normal text-primary -mt-2">
         <span className="text-[10px] text-red-500">{error}</span>
         <a href="/forgot-password" className="hover:underline">Forgot password?</a>
       </div>
-      <button
+      <AnimatedButton
         type="submit"
         className="w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white shadow-sm disabled:opacity-60"
         disabled={isLoading}
-        onClick={() => {
-          submitClickedRef.current = true;
-          onSubmit?.();
-        }}
+        rippleColor="bg-white/30"
       >
-        {isLoading ? "Signing in..." : "Access Dashboard"}
-      </button>
-      <div className="mt-2">  
+        {isLoading ? 'Signing in...' : 'Access Dashboard'}
+      </AnimatedButton>
+      <div className="mt-2">
         <div className="flex items-center gap-4">
           <span className="h-px flex-1 bg-outline-variant/60"></span>
           <span className="text-[10px] tracking-[0.3em] text-on-surface-variant">OR CONTINUE WITH</span>
           <span className="h-px flex-1 bg-outline-variant/60"></span>
         </div>
         <div className="mt-4 flex gap-3">
-          <button className="flex-1 flex items-center justify-center gap-2 rounded-full bg-surface-container-high py-2 text-xs font-medium shadow-sm">
+          <AnimatedButton
+            type="button"
+            className="flex-1 flex items-center justify-center gap-2 rounded-full bg-surface-container-high py-2 text-xs font-medium shadow-sm"
+            rippleColor="bg-primary/10"
+          >
             <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-white text-[10px] font-bold text-blue-600">G</span>
             Google
-          </button>
-          <button className="flex-1 flex items-center justify-center gap-2 rounded-full bg-surface-container-high py-2 text-xs font-medium shadow-sm">
+          </AnimatedButton>
+          <AnimatedButton
+            type="button"
+            className="flex-1 flex items-center justify-center gap-2 rounded-full bg-surface-container-high py-2 text-xs font-medium shadow-sm"
+            rippleColor="bg-primary/10"
+          >
             <span className="inline-flex h-5 w-5 items-center justify-center">
               <svg className="h-4 w-4 text-on-surface-variant" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 3 1 8l11 5 9-4.09V17h2V8L12 3Zm0 12L5 11.5v3L12 18l7-3.5v-3L12 15Z" />
               </svg>
             </span>
             SSO
-          </button>
+          </AnimatedButton>
         </div>
       </div>
       <div className="mt-4 text-center">
         <p className="text-xs text-on-surface-variant">
           New to Validator?{' '}
-          <a href="/register" className="font-semibold text-primary hover:underline">
-            Create Account
-          </a>
+          <a href="/register" className="font-semibold text-primary hover:underline">Create Account</a>
         </p>
       </div>
     </form>

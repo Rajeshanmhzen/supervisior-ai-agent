@@ -1,13 +1,8 @@
-import { motion } from "framer-motion";
-
-type MotionVariants = {
-  hidden: Record<string, unknown>;
-  show: Record<string, unknown>;
-};
+import { motion, type Variants } from "framer-motion";
 
 type Props = {
-  staggerContainer: MotionVariants;
-  fadeUpItem: MotionVariants;
+  staggerContainer: Variants;
+  fadeUpItem: Variants;
 };
 
 const StepsSection = ({ staggerContainer, fadeUpItem }: Props) => {

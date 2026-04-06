@@ -27,6 +27,7 @@ const DashboardLayout = lazy(() => import("../pages/dashboard"));
 const DashboardHome = lazy(() => import("../pages/dashboard/DashboardHome"));
 const ProjectsPage = lazy(() => import("../pages/dashboard/ProjectsPage"));
 const ProjectViewPage = lazy(() => import("../pages/dashboard/ProjectViewPage"));
+const UserProfilePage = lazy(() => import("../pages/dashboard/UserProfilePage"));
 
 const withSuspense = (element: JSX.Element, fallback?: JSX.Element) => (
   <Suspense fallback={fallback ?? <HomeSkeleton />}>
@@ -136,13 +137,7 @@ const router = createBrowserRouter([
                 },
                 {
                     path: "user",
-                    element: withSuspense(
-                        <DashboardSectionPage
-                            title="Profile"
-                            description="View your profile details and account info."
-                        />,
-                        <DashboardSkeleton />
-                    )
+                    element: withSuspense(<UserProfilePage />, <DashboardSkeleton />)
                 }
             ]
         },

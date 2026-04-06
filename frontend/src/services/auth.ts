@@ -11,6 +11,7 @@ type AuthUser = {
 type AuthResponse = {
   user: AuthUser;
   accessToken: string;
+  refreshToken: string;
 };
 
 export const authService = {

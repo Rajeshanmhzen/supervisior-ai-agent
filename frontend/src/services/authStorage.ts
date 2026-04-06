@@ -1,4 +1,5 @@
 const ACCESS_TOKEN_KEY = "access_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
 const USER_KEY = "auth_user";
 const AUTH_EVENT = "auth-token-changed";
 
@@ -11,12 +12,14 @@ export type StoredAuthUser = {
 };
 
 export const authStorage = {
-  getAccessToken: () => {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
-  },
+  getAccessToken: () => localStorage.getItem(ACCESS_TOKEN_KEY),
   setAccessToken: (token: string) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
     window.dispatchEvent(new Event(AUTH_EVENT));
+  },
+  getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
+  setRefreshToken: (token: string) => {
+    localStorage.setItem(REFRESH_TOKEN_KEY, token);
   },
   getUser: (): StoredAuthUser | null => {
     const raw = localStorage.getItem(USER_KEY);
@@ -33,6 +36,7 @@ export const authStorage = {
   },
   clear: () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     window.dispatchEvent(new Event(AUTH_EVENT));
   },

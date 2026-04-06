@@ -1,23 +1,30 @@
-import { motion } from "framer-motion";
+import { useState } from 'react'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 
-type MotionVariants = {
-  hidden: Record<string, unknown>;
-  show: Record<string, unknown>;
-};
+type Ripple = { id: number; x: number; y: number }
 
 type Props = {
-  staggerContainer: MotionVariants;
-  fadeUpItem: MotionVariants;
-};
+  staggerContainer: Variants
+  fadeUpItem: Variants
+}
 
 const CoreEngineSection = ({ staggerContainer, fadeUpItem }: Props) => {
+  const [ripples, setRipples] = useState<Ripple[]>([])
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const id = Date.now()
+    setRipples((p) => [...p, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }])
+    setTimeout(() => setRipples((p) => p.filter((r) => r.id !== id)), 600)
+  }
+
   return (
     <motion.section
       className="py-24 bg-surface-container-low"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: false, amount: 0.2 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: 'easeOut' as const }}
     >
       <div className="max-w-7xl mx-auto px-8">
         <div className="mb-16">
@@ -82,9 +89,27 @@ const CoreEngineSection = ({ staggerContainer, fadeUpItem }: Props) => {
                 Download a detailed PDF breakdown of every missing citation, broken link, or
                 formatting anomaly found in your document.
               </p>
-              <button className="mt-8 px-6 py-3 bg-white text-primary font-bold rounded-xl active:scale-95 transition-all">
+              <motion.button
+                className="relative overflow-hidden mt-8 px-6 py-3 bg-white text-primary font-bold rounded-xl transition-shadow hover:shadow-lg"
+                whileTap={{ scale: 0.93 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                onClick={handleClick}
+              >
+                <AnimatePresence>
+                  {ripples.map((r) => (
+                    <motion.span
+                      key={r.id}
+                      className="absolute rounded-full bg-primary/10 pointer-events-none"
+                      style={{ left: r.x, top: r.y, translateX: '-50%', translateY: '-50%' }}
+                      initial={{ width: 0, height: 0, opacity: 0.6 }}
+                      animate={{ width: 220, height: 220, opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6, ease: 'easeOut' as const }}
+                    />
+                  ))}
+                </AnimatePresence>
                 View Sample Report
-              </button>
+              </motion.button>
             </div>
             <div className="flex-shrink-0 w-64 h-48 bg-white/10 rounded-lg backdrop-blur-md border border-white/20 p-4">
               <div className="space-y-3">
@@ -98,7 +123,7 @@ const CoreEngineSection = ({ staggerContainer, fadeUpItem }: Props) => {
         </motion.div>
       </div>
     </motion.section>
-  );
-};
+  )
+}
 
-export default CoreEngineSection;
+export default CoreEngineSection

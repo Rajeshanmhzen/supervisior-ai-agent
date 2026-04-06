@@ -5,7 +5,11 @@ export const userController = (app: FastifyInstance) => {
   const service = userService(app); 
 
   const listUser = async (req: any, reply: any) => {
-    const result = await service.listUser();
+    const { page, limit } = req.query as { page?: string; limit?: string };
+    const result = await service.listUser({
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
     return reply.code(200).send(result);
   };
 
@@ -30,9 +34,10 @@ export const userController = (app: FastifyInstance) => {
 
   const editProfileImage = async (req: any, reply: any) => {
     const { id } = req.params;
-    const { imageUrl } = req.body;
-    await service.editProfileImage(id, imageUrl);
-    return reply.code(200).send({ ok: true });
+    const file = await req.file();
+    if(!file) return reply.code(400).send({ message: 'No file uploaded' });
+    const result = await service.editProfileImage(id, file);
+    return reply.code(200).send(result);
   };
 
   const editUserPassword = async (req: any, reply: any) => {

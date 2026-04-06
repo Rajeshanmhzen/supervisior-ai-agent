@@ -1,10 +1,10 @@
-import { Button } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import MoniveoLogo from './MoniveoLogo'
 import { authService } from '../../services/auth'
 import { authStorage } from '../../services/authStorage'
 import { notifications } from '@mantine/notifications'
+import AnimatedButton from './AnimatedButton'
 
 const Header = () => {
   const navigate  = useNavigate()
@@ -76,37 +76,39 @@ const Header = () => {
           })}
         </div>
         <div className="flex items-center gap-4">
-          <Button
-          onClick={async () => {
-            if (!isAuthed) {
-              navigate('/login')
-              return
-            }
-            try {
-              await authService.logout()
-              notifications.show({
-                title: 'Logged out',
-                message: 'You have been signed out.',
-                color: 'green',
-              })
-            } finally {
-              authStorage.clear()
-              navigate('/login')
-            }
-          }}
-            unstyled
-            className="px-6 py-2.5 rounded-full font-headline text-sm font-bold bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
+          <AnimatedButton
+            type="button"
+            onClick={async () => {
+              if (!isAuthed) {
+                navigate('/login')
+                return
+              }
+              try {
+                await authService.logout()
+                notifications.show({
+                  title: 'Logged out',
+                  message: 'You have been signed out.',
+                  color: 'green',
+                })
+              } finally {
+                authStorage.clear()
+                navigate('/login')
+              }
+            }}
+            className="px-6 py-2.5 rounded-full font-headline text-sm font-bold bg-primary text-on-primary hover:opacity-90 transition-colors duration-200 cursor-pointer"
+            rippleColor="bg-white/30"
           >
             {isAuthed ? 'Logout' : 'Sign In'}
-          </Button>
+          </AnimatedButton>
           {isAuthed && (
-            <Button
+            <AnimatedButton
+              type="button"
               onClick={() => navigate('/dashboard')}
-              unstyled
-              className="px-6 py-2.5 rounded-full font-headline text-sm font-bold border border-primary text-primary hover:opacity-90 active:scale-95 transition-all duration-200 cursor-pointer"
+              className="px-6 py-2.5 rounded-full font-headline text-sm font-bold border border-primary text-primary hover:opacity-90 transition-colors duration-200 cursor-pointer"
+              rippleColor="bg-primary/10"
             >
               Dashboard
-            </Button>
+            </AnimatedButton>
           )}
         </div>
         </div>

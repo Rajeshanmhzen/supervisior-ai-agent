@@ -4,7 +4,7 @@ import { authService } from './auth.service';
 const setRefreshCookie = (reply: FastifyReply, token: string) => {
   reply.setCookie('refreshToken', token, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     path: '/',
     secure: false,
   });
@@ -17,22 +17,24 @@ export const authController = (app: FastifyInstance) => {
     const { fullName, email, password, role } = req.body as any;
     const result = await service.register({ fullName, email, password, role });
     setRefreshCookie(reply, result.refreshToken);
-    return reply.send({ user: result.user, accessToken: result.accessToken });
+    return reply.send({ user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken });
   };
 
   const login = async (req: FastifyRequest, reply: FastifyReply) => {
     const { email, password } = req.body as any;
     const result = await service.login({ email, password });
     setRefreshCookie(reply, result.refreshToken);
-    return reply.send({ user: result.user, accessToken: result.accessToken });
+    return reply.send({ user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken });
   };
 
   const refresh = async (req: FastifyRequest, reply: FastifyReply) => {
-    const refreshToken = (req.cookies as any).refreshToken;
+    const cookieToken = (req.cookies as any).refreshToken;
+    const bodyToken = (req.body as any)?.refreshToken;
+    const refreshToken = cookieToken || bodyToken;
     if (!refreshToken) return reply.code(401).send({ message: 'No refresh token' });
     const result = await service.refresh(refreshToken);
     setRefreshCookie(reply, result.refreshToken);
-    return reply.send({ accessToken: result.accessToken });
+    return reply.send({ accessToken: result.accessToken, refreshToken: result.refreshToken });
   };
 
   const logout = async (req: FastifyRequest, reply: FastifyReply) => {
