@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import PageWrapper from "../../components/shared/PageWrapper";
 import InputField from "../../components/shared/InputField";
 import Button from "../../components/shared/Button";
+import AnimatedButton from "../../components/shared/AnimatedButton";
 import { authService } from "../../services/auth";
 import { forgotFlowStorage } from "../../services/forgotFlowStorage";
 import { notifications } from "@mantine/notifications";
@@ -129,14 +130,15 @@ const VerifyCodePage = () => {
             />
             <div className="flex items-center justify-between text-[10px]">
               <span className="text-red-500">{error}</span>
-              <button
+              <AnimatedButton
                 type="button"
                 onClick={handleResend}
                 disabled={isResending}
                 className="font-semibold text-primary hover:underline disabled:opacity-60"
+                rippleColor="bg-primary/10"
               >
                 {isResending ? "Resending..." : "Resend code"}
-              </button>
+              </AnimatedButton>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Verifying..." : "Verify"}

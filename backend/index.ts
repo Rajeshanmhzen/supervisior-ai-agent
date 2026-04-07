@@ -1,7 +1,8 @@
 import { config } from "dotenv";
 import app from "./src/app";
   
-config();
+config({ quiet: true });
+require("./src/modules/processing/worker");
 
 const PORT = Number(process.env.PORT) || 3000;
 app.listen({ port: PORT }, (err: Error | null, address: string) => {

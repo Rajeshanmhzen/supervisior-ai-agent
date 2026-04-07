@@ -1,50 +1,22 @@
 import { motion } from "framer-motion";
 import { useUploadProjectModal } from "../dashboard";
+import { FiFolder, FiCheckSquare, FiAlertTriangle, FiShield, FiFileText, FiActivity, FiUpload, FiList } from "react-icons/fi";
+import type { IconType } from "react-icons";
 
-const overviewCards = [
-  {
-    title: "Total Projects",
-    value: "12",
-    subtitle: "Active submissions",
-    icon: "folder",
-  },
-  {
-    title: "Validations",
-    value: "48",
-    subtitle: "Runs this month",
-    icon: "fact_check",
-  },
-  {
-    title: "Issues Found",
-    value: "124",
-    subtitle: "Needs review",
-    icon: "warning",
-  },
-  {
-    title: "Verified",
-    value: "32",
-    subtitle: "Approved outputs",
-    icon: "verified",
-  },
-  {
-    title: "Reports",
-    value: "21",
-    subtitle: "Generated PDFs",
-    icon: "description",
-  },
-  {
-    title: "Recent Activity",
-    value: "5",
-    subtitle: "Actions today",
-    icon: "timeline",
-  },
+const overviewCards: { title: string; value: string; subtitle: string; icon: IconType }[] = [
+  { title: "Total Projects", value: "12", subtitle: "Active submissions", icon: FiFolder },
+  { title: "Validations", value: "48", subtitle: "Runs this month", icon: FiCheckSquare },
+  { title: "Issues Found", value: "124", subtitle: "Needs review", icon: FiAlertTriangle },
+  { title: "Verified", value: "32", subtitle: "Approved outputs", icon: FiShield },
+  { title: "Reports", value: "21", subtitle: "Generated PDFs", icon: FiFileText },
+  { title: "Recent Activity", value: "5", subtitle: "Actions today", icon: FiActivity },
 ];
 
-const quickActions = [
-  { label: "Upload Project", icon: "upload" },
-  { label: "Run Validation", icon: "fact_check" },
-  { label: "Generate Report", icon: "description" },
-  { label: "Manage Rules", icon: "rule" },
+const quickActions: { label: string; icon: IconType }[] = [
+  { label: "Upload Project", icon: FiUpload },
+  { label: "Run Validation", icon: FiCheckSquare },
+  { label: "Generate Report", icon: FiFileText },
+  { label: "Manage Rules", icon: FiList },
 ];
 
 const systemOverview = [
@@ -93,9 +65,7 @@ const DashboardHome = () => {
               <p className="text-sm font-semibold text-slate-700">
                 {card.title}
               </p>
-              <span className="material-symbols-outlined text-base">
-                {card.icon}
-              </span>
+              <card.icon className="text-base" />
             </div>
             <p className="mt-3 text-2xl font-semibold text-slate-900">
               {card.value}
@@ -125,9 +95,7 @@ const DashboardHome = () => {
                 variants={fadeUp}
                 onClick={() => handleQuickAction(action.label)}
               >
-                <span className="material-symbols-outlined text-base">
-                  {action.icon}
-                </span>
+                <action.icon className="text-base" />
                 {action.label}
               </motion.button>
             ))}

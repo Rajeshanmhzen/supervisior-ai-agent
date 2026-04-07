@@ -65,6 +65,11 @@ const DashboardConfirmContext = createContext<((options: ConfirmOptions) => void
 
 const UploadProjectModalContext = createContext<(() => void) | null>(null);
 
+const RefreshContext = createContext<{ trigger: number; setTrigger: (n: number) => void }>({
+  trigger: 0,
+  setTrigger: () => {},
+});
+
 export const useDashboardConfirm = () => {
   const context = useContext(DashboardConfirmContext);
   if (!context) {
@@ -81,6 +86,8 @@ export const useUploadProjectModal = () => {
   return context;
 };
 
+export const useRefresh = () => useContext(RefreshContext);
+
 const DashboardPage = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -94,6 +101,7 @@ const DashboardPage = () => {
     message: "",
     onConfirm: null,
   });
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const unsubscribe = authStorage.subscribe(() => {
@@ -191,8 +199,9 @@ const DashboardPage = () => {
   return (
     <DashboardConfirmContext.Provider value={openConfirm}>
       <UploadProjectModalContext.Provider value={openUploadModal}>
-        <div className="min-h-screen bg-[#f4f6fb]">
-        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
+        <RefreshContext.Provider value={{ trigger: refreshTrigger, setTrigger: setRefreshTrigger }}>
+          <div className="min-h-screen bg-[#f4f6fb]">
+            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-6 py-4">
             <div className="flex items-center">
               <div className="text-2xl font-black tracking-tighter text-blue-600 font-headline flex items-center gap-2">
@@ -494,8 +503,9 @@ const DashboardPage = () => {
           </div>
         </div>
       )}
-        <UploadProjectModal isOpen={isUploadModalOpen} onClose={closeUploadModal} />
-        </div>
+        <UploadProjectModal isOpen={isUploadModalOpen} onClose={closeUploadModal} onSuccess={() => setRefreshTrigger((n) => n + 1)} />
+          </div>
+        </RefreshContext.Provider>
       </UploadProjectModalContext.Provider>
     </DashboardConfirmContext.Provider>
   );

@@ -120,6 +120,7 @@ model FileUpload {
 
   // analysis output (AI / processing result)
   analysisResult Json?
+  ruleCheck      Json?
   errorMessage   String?
 
   createdAt     DateTime @default(now())

@@ -1,0 +1,35 @@
+{
+  "university": "TU",
+  "program": "BCA",
+  "semester": "4th",
+  "requiredSections": [
+    "Abstract",
+    "Introduction",
+    "Objectives",
+    "Methodology",
+    "References"
+  ],
+  "abstract": {
+    "minWords": 150,
+    "maxWords": 300
+  },
+  "references": {
+    "required": true,
+    "patterns": [
+      "doi",
+      "http",
+      "https"
+    ]
+  },
+  "figures": {
+    "requireCaptionPrefix": [
+      "Figure",
+      "Fig."
+    ]
+  },
+  "tables": {
+    "requireCaptionPrefix": [
+      "Table"
+    ]
+  }
+}

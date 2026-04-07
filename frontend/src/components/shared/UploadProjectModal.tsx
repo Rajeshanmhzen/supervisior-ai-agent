@@ -1,10 +1,14 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { FiFileText, FiImage, FiTrash2, FiX } from "react-icons/fi";
+import { FiFileText, FiImage, FiTrash2, FiX, FiCheck } from "react-icons/fi";
+import { userService } from "../../services/user";
+import { authStorage } from "../../services/authStorage";
+import AnimatedButton from "./AnimatedButton";
 
 type UploadProjectModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
 const semesterOptions = ["4th", "6th", "8th", "Internship"];
@@ -21,13 +25,15 @@ const formatFileSize = (size: number) => {
   return `${(size / (1024 * 1024)).toFixed(2)} MB`;
 };
 
-const UploadProjectModal = ({ isOpen, onClose }: UploadProjectModalProps) => {
+const UploadProjectModal = ({ isOpen, onClose, onSuccess }: UploadProjectModalProps) => {
   const [semester, setSemester] = useState("");
   const [university, setUniversity] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileType, setFileType] = useState<"pdf" | "docx" | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -53,8 +59,30 @@ const UploadProjectModal = ({ isOpen, onClose }: UploadProjectModalProps) => {
   const closeModal = () => {
     setSemester("");
     setUniversity("");
+    setUploadError("");
     clearSelectedFile();
     onClose();
+  };
+
+  const handleUpload = async () => {
+    const user = authStorage.getUser();
+    if (!selectedFile || !semester || !university || !user) {
+      setUploadError("Please fill all fields and select a file");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError("");
+
+    try {
+      await userService.addSubmission(selectedFile, semester, university, user.id);
+      onSuccess?.();
+      closeModal();
+    } catch (err: any) {
+      setUploadError(err.message || "Upload failed");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,17 +155,18 @@ const UploadProjectModal = ({ isOpen, onClose }: UploadProjectModalProps) => {
             </p>
           </div>
           <div className="relative">
-            <button
+            <AnimatedButton
               type="button"
               onClick={closeModal}
               className="group h-9 w-9 rounded-full border border-red-200 bg-red-50 text-red-600 shadow-sm hover:bg-red-100 flex items-center justify-center"
+              rippleColor="bg-red-300/30"
               aria-label="Close upload form"
             >
               <FiX size={18} />
               <span className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow transition group-hover:opacity-100">
                 Close
               </span>
-            </button>
+            </AnimatedButton>
           </div>
         </div>
 
@@ -241,14 +270,15 @@ const UploadProjectModal = ({ isOpen, onClose }: UploadProjectModalProps) => {
                       </p>
                     </div>
                   </div>
-                  <button
+                  <AnimatedButton
                     type="button"
                     onClick={clearSelectedFile}
                     className="h-9 w-9 rounded-full bg-white text-red-600 shadow-md border border-red-100 hover:bg-red-50 flex items-center justify-center"
+                    rippleColor="bg-red-300/30"
                     aria-label="Remove file"
                   >
                     <FiTrash2 size={16} />
-                  </button>
+                  </AnimatedButton>
                 </div>
               )}
               {selectedFile && fileType === "pdf" && previewUrl && (
@@ -271,20 +301,37 @@ const UploadProjectModal = ({ isOpen, onClose }: UploadProjectModalProps) => {
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
+          <AnimatedButton
             type="button"
             onClick={closeModal}
             className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            rippleColor="bg-slate-300/30"
           >
             Cancel
-          </button>
-          <button
+          </AnimatedButton>
+          <AnimatedButton
             type="button"
-            className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            onClick={handleUpload}
+            disabled={isUploading || !selectedFile || !semester || !university}
+            className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            rippleColor="bg-white/30"
           >
-            Save Details
-          </button>
+            {isUploading ? (
+              <>
+                <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <FiCheck size={16} />
+                Save Details
+              </>
+            )}
+          </AnimatedButton>
         </div>
+        {uploadError && (
+          <p className="mt-3 text-sm text-red-500 text-center">{uploadError}</p>
+        )}
       </motion.div>
     </motion.div>
   );
