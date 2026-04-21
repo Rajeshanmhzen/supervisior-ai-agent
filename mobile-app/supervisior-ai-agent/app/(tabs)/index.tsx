@@ -1,98 +1,172 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import QuickActionsList from '@/components/dashboard/QuickActionsList';
+import ValidationStatsGrid from '@/components/dashboard/ValidationStatsGrid';
+import { useThemeColors } from '@/context/ThemeContext';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ScrollView
+      style={styles.wrap}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 6 }]}
+      showsVerticalScrollIndicator={false}>
+      <View style={styles.headerCard}>
+        <Text style={styles.headerText}>Hey, Alex 👋</Text>
+        <View style={styles.bellWrap}>
+          <MaterialIcons name="notifications" size={18} color={colors.primary} />
+          <View style={styles.bellDot} />
+        </View>
+      </View>
+
+      <ValidationStatsGrid />
+
+      <Text style={styles.section}>Quick Actions</Text>
+      <QuickActionsList />
+
+      <Text style={styles.section}>Recent Activity</Text>
+      <View style={styles.activityTimeline}>
+        <View style={styles.timelineLine} />
+        <ActivityItem
+          colors={colors}
+          tone="success"
+          icon="check"
+          title="Project Alpha validation completed successfully."
+          time="10 mins ago"
+        />
+        <ActivityItem
+          colors={colors}
+          tone="neutral"
+          icon="north"
+          title="New document uploaded to Q3 Marketing."
+          time="2 hours ago"
+        />
+        <ActivityItem
+          colors={colors}
+          tone="danger"
+          icon="priority-high"
+          title="Validation failed for Invoice #4029. Missing signatures."
+          time="5 hours ago"
+        />
+      </View>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
+function ActivityItem({
+  colors,
+  tone,
+  icon,
+  title,
+  time,
+}: {
+  colors: ReturnType<typeof useThemeColors>;
+  tone: 'success' | 'neutral' | 'danger';
+  icon: keyof typeof MaterialIcons.glyphMap;
+  title: string;
+  time: string;
+}) {
+  const styles = createStyles(colors);
+  const toneStyles =
+    tone === 'success'
+      ? { bg: colors.backgroundAlt, border: colors.success, icon: colors.success }
+      : tone === 'danger'
+        ? { bg: colors.backgroundAlt, border: colors.error, icon: colors.error }
+        : { bg: colors.backgroundAlt, border: colors.border, icon: colors.textSecondary };
+
+  return (
+    <View style={styles.activityRow}>
+      <View style={[styles.activityBullet, { borderColor: toneStyles.icon }]}>
+        <MaterialIcons name={icon} size={12} color={toneStyles.icon} />
+      </View>
+      <View style={[styles.activityCard, { backgroundColor: toneStyles.bg, borderColor: toneStyles.border }]}>
+        <Text style={styles.activityTitle}>{title}</Text>
+        <Text style={styles.activityTime}>{time}</Text>
+      </View>
+    </View>
+  );
+}
+
+const createStyles = (colors: ReturnType<typeof useThemeColors>) =>
+  StyleSheet.create({
+  wrap: { flex: 1, backgroundColor: colors.background },
+  content: { paddingHorizontal: 10, paddingBottom: 20 },
+  headerCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  headerText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    fontFamily: 'LexendBold',
+  },
+  bellWrap: { position: 'relative' },
+  bellDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.error,
     position: 'absolute',
+    top: -1,
+    right: 0,
+    borderWidth: 1,
+    borderColor: colors.surface,
   },
+  section: {
+    marginTop: 8,
+    marginBottom: 8,
+    fontSize: 24,
+    lineHeight: 28,
+    fontWeight: '700',
+    color: colors.text,
+    letterSpacing: -0.4,
+    fontFamily: 'LexendBold',
+  },
+  activityTimeline: {
+    position: 'relative',
+    paddingLeft: 0,
+  },
+  timelineLine: {
+    position: 'absolute',
+    left: 10.5,
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: colors.border,
+  },
+  activityRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
+  activityBullet: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+    marginTop: 8,
+  },
+  activityCard: {
+    flex: 1,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 11,
+    borderWidth: 1,
+    minHeight: 66,
+  },
+  activityTitle: { fontSize: 11, lineHeight: 15, color: colors.text, fontWeight: '600' },
+  activityTime: { fontSize: 10, color: colors.textTertiary, marginTop: 4 },
 });
