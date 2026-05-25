@@ -28,6 +28,8 @@ const DashboardHome = lazy(() => import("../pages/dashboard/DashboardHome"));
 const ProjectsPage = lazy(() => import("../pages/dashboard/ProjectsPage"));
 const ProjectViewPage = lazy(() => import("../pages/dashboard/ProjectViewPage"));
 const UserProfilePage = lazy(() => import("../pages/dashboard/UserProfilePage"));
+const GuidelinePage = lazy(() => import("../pages/dashboard/GuidelinePage"));
+const SyllabusPage = lazy(() => import("../pages/dashboard/SyllabusPage"));
 
 const withSuspense = (element: JSX.Element, fallback?: JSX.Element) => (
   <Suspense fallback={fallback ?? <HomeSkeleton />}>
@@ -86,34 +88,12 @@ const router = createBrowserRouter([
                     element: withSuspense(<ProjectViewPage />, <ProjectViewSkeleton />)
                 },
                 {
-                    path: "reports",
-                    element: withSuspense(
-                        <DashboardSectionPage
-                            title="Reports"
-                            description="Generate and download validation reports."
-                        />,
-                        <DashboardSkeleton />
-                    )
-                },
-                {
-                    path: "history",
-                    element: withSuspense(
-                        <DashboardSectionPage
-                            title="History"
-                            description="View past validation runs and status changes."
-                        />,
-                        <DashboardSkeleton />
-                    )
-                },
-                {
                     path: "guidelines",
-                    element: withSuspense(
-                        <DashboardSectionPage
-                            title="Guidelines"
-                            description="Reference BCA formatting and structure rules."
-                        />,
-                        <DashboardSkeleton />
-                    )
+                    element: withSuspense(<GuidelinePage />, <DashboardSkeleton />)
+                },
+                {
+                    path: "syllabus",
+                    element: withSuspense(<SyllabusPage />, <DashboardSkeleton />)
                 },
                 {
                     path: "settings",

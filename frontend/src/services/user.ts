@@ -38,6 +38,19 @@ export const userService = {
   getSubmission: async (id: string) => {
     return apiRequest<{ submission: SubmissionDetail }>(`/submissions/detail/${id}`);
   },
+  
+  chatWithSupervisor: async (id: string, message: string) => {
+    return apiRequest<{ response: string }>(`/submissions/chat/${id}`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  },
+
+  recheckSubmission: async (id: string) => {
+    return apiRequest<{ message: string }>(`/submissions/recheck/${id}`, {
+      method: 'POST',
+    });
+  },
 
   getSubmissionFileUrl: (id: string) => {
     const base = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
@@ -59,17 +72,14 @@ export type Submission = {
 export type SubmissionDetail = Submission & {
   storedName: string;
   path: string;
-  analysisResult?: {
-    aiFeedback?: Array<{
-      pageRange: string;
-      summary?: string;
-      issues?: Array<{ severity: string; message: string }>;
-      suggestions?: string[];
-    }>;
-  };
+  progress?: number;
+  errorMessage?: string | null;
+  analysisResult?: any;
   ruleCheck?: {
     passed: boolean;
-    issues: Array<{ severity: string; message: string; rule?: string }>;
+    issues: Array<{ severity: string; message: string; fix?: string; rule?: string }>;
     summary?: string;
+    score?: number;
+    isProposal?: boolean;
   } | null;
 };

@@ -37,7 +37,9 @@ const isTokenExpired = (token: string): boolean => {
 const isRefreshTokenExpired = (): boolean => {
   const token = authStorage.getRefreshToken();
   if (!token) return true;
-  return isTokenExpired(token);
+  // Refresh token is an opaque string, not a JWT. 
+  // We assume it is valid and let the backend reject it if it's expired.
+  return false;
 };
 
 const tryRefreshToken = (): Promise<boolean> => {

@@ -1,0 +1,17 @@
+{
+  "semester": "4th",
+  "version": "TU BCA Project I",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_4th.pdf"],
+  "proposalSections": [
+    "Introduction",
+    "Problem Statement",
+    "Objectives",
+    "Methodology (Requirement + Feasibility)",
+    "High Level Design",
+    "Gantt Chart",
+    "Expected Outcome",
+    "References"
+  ],
+  "formattingOverrides": {}
+}

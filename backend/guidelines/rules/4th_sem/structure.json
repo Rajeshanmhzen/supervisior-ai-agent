@@ -1,0 +1,35 @@
+{
+  "semester": "4th",
+  "version": "TU BCA Project I (CACS256) - Official Guideline",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_4th.pdf"],
+  "requiredSections": [
+    "Cover Page", 
+    "Supervisor’s Recommendation", 
+    "Letter of Approval", 
+    "Abstract", 
+    "Acknowledgement", 
+    "Table of Contents", 
+    "List of Abbreviations", 
+    "List of Figures", 
+    "List of Tables", 
+    "References"
+  ],
+  "requiredChapters": ["1", "2", "3", "4", "5"],
+  "chapterDetails": {
+    "1": ["Introduction", "Problem Statement", "Objectives", "Scope and Limitation", "Report Organization"],
+    "2": ["Background Study", "Literature Review"],
+    "3": ["System Analysis", "System Design"],
+    "4": ["Implementation", "Testing"],
+    "5": ["Conclusion", "Future Recommendations"]
+  },
+  "proposalSections": [
+    "Introduction", 
+    "Problem Statement", 
+    "Objectives", 
+    "Methodology", 
+    "Gantt Chart", 
+    "Expected Outcome", 
+    "References"
+  ]
+}

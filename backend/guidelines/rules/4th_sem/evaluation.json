@@ -1,0 +1,20 @@
+{
+  "semester": "4th",
+  "version": "TU BCA Project I (CACS256)",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_4th.pdf"],
+  "evaluationCriteria": {
+    "proposalDefense": 10,
+    "midtermFinalWork": 70,
+    "vivaVoice": 20
+  },
+  "scoring": {
+    "total": 100,
+    "breakdown": [
+      { "stage": "Proposal Defense", "weight": 10, "evaluators": ["Research Committee"] },
+      { "stage": "Work Done (System Analysis, Implementation, etc.)", "weight": 50, "evaluators": ["Supervisor + Internal"] },
+      { "stage": "Documentation", "weight": 20, "evaluators": ["Supervisor + Internal"] },
+      { "stage": "Viva + Demonstration", "weight": 20, "evaluators": ["External Examiner"] }
+    ]
+  }
+}

@@ -40,3 +40,29 @@ export const emitSubmissionUpdate = (
     safeSend(socket, message);
   }
 };
+
+/**
+ * Emit a detailed review-complete notification with score summary.
+ * Sent when document processing finishes (COMPLETED or FAILED).
+ */
+export const emitReviewComplete = (
+  userId: string,
+  payload: {
+    fileId: string;
+    status: 'COMPLETED' | 'FAILED';
+    documentName: string;
+    totalScore?: number;
+    issueCount?: number;
+    formatting?: number;
+    structure?: number;
+    content?: number;
+    errorMessage?: string | null;
+  }
+) => {
+  const set = clients.get(userId);
+  if (!set || set.size === 0) return;
+  const message = JSON.stringify({ type: 'review.complete', payload });
+  for (const socket of set) {
+    safeSend(socket, message);
+  }
+};

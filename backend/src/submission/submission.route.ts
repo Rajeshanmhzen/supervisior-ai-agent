@@ -11,6 +11,8 @@ export default async function submissionRoutes(app: FastifyInstance) {
   app.get('/file/:id',      { preHandler: [authenticate] }, asyncHandler(controller.serveFile));
   app.post('/add',          { preHandler: [authenticate] }, asyncHandler(controller.addSubmission));
   app.delete('/delete/:id', { preHandler: [authenticate] }, asyncHandler(controller.deleteSubmission));
+  app.post('/chat/:id',     { preHandler: [authenticate] }, asyncHandler(controller.chatWithSupervisor));
+  app.post('/recheck/:id',  { preHandler: [authenticate] }, asyncHandler(controller.recheckSubmission));
 
   app.get(
     '/stream',

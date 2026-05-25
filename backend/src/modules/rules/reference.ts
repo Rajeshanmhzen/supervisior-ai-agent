@@ -1,4 +1,5 @@
 import { RuleCheckResult, RuleIssue } from './rules.types';
+import { findSectionIndex } from '../../../guidelines/rules.engine';
 
 const BASE_SCORE = 15;
 
@@ -15,12 +16,22 @@ const scorePenalty = (severity: RuleIssue['severity']) => {
 };
 
 const extractSection = (text: string, section: string) => {
-  const pattern = new RegExp(`(^|\\n)\\s*${section}\\s*(\\n|:)`, 'i');
-  const match = pattern.exec(text);
-  if (!match) return '';
-  const start = match.index + match[0].length;
+  const index = findSectionIndex(text, section);
+  if (index === -1) return '';
+
+  const lineEnd = text.indexOf('\n', index);
+  const start = lineEnd !== -1 ? lineEnd + 1 : index;
   const after = text.slice(start);
-  const nextHeading = after.search(/\n\s*[A-Z][A-Za-z0-9\s]{2,}\n/);
+
+  const headingRegex = /\n\s*(?:(?:Chapter\s+\d+)|(?:Appendix\b)|(?:[A-Z][A-Za-z0-9\s]{4,}\n))/ig;
+  let nextHeading = -1;
+  let match;
+  while ((match = headingRegex.exec(after)) !== null) {
+    if (match.index > 50) {
+      nextHeading = match.index;
+      break;
+    }
+  }
   return (nextHeading >= 0 ? after.slice(0, nextHeading) : after).trim();
 };
 

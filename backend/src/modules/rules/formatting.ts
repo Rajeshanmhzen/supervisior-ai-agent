@@ -15,17 +15,17 @@ const scorePenalty = (severity: RuleIssue['severity']) => {
 };
 
 const hasLikelyHeading = (text: string, heading: string) =>
-  new RegExp(`(^|\\n)\\s*${heading}\\s*(\\n|:)`, 'i').test(text);
+  new RegExp(`(?:^|\\n)\\s*(?:\\d+(?:\\.\\d+)*\\.?\\s+)?${heading}\\b`, 'i').test(text);
 
 const countOccurrences = (text: string, pattern: RegExp) => {
   const matches = text.match(pattern);
   return matches ? matches.length : 0;
 };
 
-export const runFormattingRules = (text: string): RuleCheckResult => {
+export const runFormattingRules = (text: string, isProposal?: boolean): RuleCheckResult => {
   const issues: RuleIssue[] = [];
 
-  if (!hasLikelyHeading(text, 'Abstract')) {
+  if (!isProposal && !hasLikelyHeading(text, 'Abstract')) {
     issues.push({
       category: 'formatting',
       severity: 'MAJOR',
@@ -59,16 +59,20 @@ export const runFormattingRules = (text: string): RuleCheckResult => {
     });
   }
 
-  const tableCaptions = countOccurrences(text, /\bTable\s+\d+/gi);
-  if (tableCaptions === 0) {
-    issues.push({
-      category: 'formatting',
-      severity: 'MINOR',
-      rule: 'formatting:tables:captions',
-      problem: 'No table captions detected.',
-      reason: 'Tables should be labeled (e.g., "Table 1") for clarity and referencing.',
-      fix: 'Add numbered table captions in the format "Table X".',
-    });
+  const lowerText = text.toLowerCase();
+  const hasTables = !isProposal && lowerText.replace(/\btable\s+of\s+contents\b/g, '').includes('table');
+  if (hasTables) {
+    const tableCaptions = countOccurrences(text, /\bTable\s+\d+/gi);
+    if (tableCaptions === 0) {
+      issues.push({
+        category: 'formatting',
+        severity: 'MINOR',
+        rule: 'formatting:tables:captions',
+        problem: 'No table captions detected.',
+        reason: 'Tables should be labeled (e.g., "Table 1") for clarity and referencing.',
+        fix: 'Add numbered table captions in the format "Table X".',
+      });
+    }
   }
 
   const rawScore = issues.reduce((score, issue) => score - scorePenalty(issue.severity), BASE_SCORE);

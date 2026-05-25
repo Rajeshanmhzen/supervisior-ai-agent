@@ -22,6 +22,7 @@ import {
   FiLogOut,
   FiSettings,
   FiUser,
+  FiBook,
 } from "react-icons/fi";
 import { authStorage } from "../services/authStorage";
 import MoniveoLogo from "../components/shared/MoniveoLogo";
@@ -33,9 +34,8 @@ type NavItem = { label: string; icon: IconType; link: string };
 const navItems: NavItem[] = [
   { label: "Dashboard", icon: FiGrid, link: "/dashboard" },
   { label: "My Projects", icon: FiFolder, link: "/dashboard/projects" },
-  { label: "Reports", icon: FiFileText, link: "/dashboard/reports" },
-  { label: "History", icon: FiClock, link: "/dashboard/history" },
   { label: "Guidelines", icon: FiBookOpen, link: "/dashboard/guidelines" },
+  { label: "Syllabus", icon: FiBook, link: "/dashboard/syllabus" },
 ];
 
 const manageItems: NavItem[] = [
@@ -264,7 +264,7 @@ const DashboardPage = () => {
           }`}
         >
           <aside
-            className={`rounded-3xl bg-white p-4 shadow-sm ${
+            className={`${
               sidebarCollapsed ? "min-w-[88px]" : "min-w-[240px]"
             }`}
           >

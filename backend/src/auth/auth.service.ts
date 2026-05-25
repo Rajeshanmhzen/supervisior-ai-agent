@@ -107,6 +107,8 @@ export const authService = (app: FastifyInstance) => {
         where: { id: log.id },
         data: { status: 'SEND' },
       });
+      // TEMPORARY: Log code to console since email server is not configured
+      console.log(`\n\n=== PASSWORD RESET CODE ===\nEmail: ${user.email}\nCode: ${code}\n===========================\n\n`);
       return { ok: true, code };
     } catch (err) {
       await app.prisma.emailLog.update({

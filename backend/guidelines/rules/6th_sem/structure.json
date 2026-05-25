@@ -1,0 +1,34 @@
+{
+  "semester": "6th",
+  "version": "TU BCA Project II (CAPJ356)",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_6th.pdf"],
+  "requiredSections": [
+    "Cover Page", 
+    "Certificate", 
+    "Abstract", 
+    "Acknowledgement", 
+    "Table of Contents", 
+    "List of Abbreviations", 
+    "List of Figures", 
+    "List of Tables", 
+    "References"
+  ],
+  "requiredChapters": ["1", "2", "3", "4", "5"],
+  "chapterDetails": {
+    "1": ["Introduction", "Problem Statement", "Objectives", "Scope and Limitation", "Development Methodology", "Report Organization"],
+    "2": ["Background Study", "Literature Review"],
+    "3": ["System Analysis", "System Design", "Algorithm Details"],
+    "4": ["Implementation", "Testing"],
+    "5": ["Conclusion", "Future Recommendations"]
+  },
+  "proposalSections": [
+    "Introduction", 
+    "Problem Statement", 
+    "Objectives", 
+    "Methodology", 
+    "Gantt Chart", 
+    "Expected Outcome", 
+    "References"
+  ]
+}

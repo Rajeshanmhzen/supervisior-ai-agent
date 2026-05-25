@@ -1,0 +1,21 @@
+{
+  "semester": "6th",
+  "version": "TU BCA Project II (CAPJ356)",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_6th.pdf"],
+  "proposalSections": [
+    "Introduction",
+    "Problem Statement",
+    "Objectives",
+    "Methodology",
+    "Gantt Chart",
+    "Expected Outcome",
+    "References"
+  ],
+  "methodologySubSections": [
+    "Requirement Identification",
+    "Feasibility Study",
+    "High Level Design of System"
+  ],
+  "formattingOverrides": {}
+}

@@ -1,12 +1,14 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import fs from 'fs';
 import { extractPdfPages, extractPdfText } from '../file/file.service';
 import { analyzeWithAI } from '../ai/ai.service';
-import { getGuidelineRules, getGuidelineText } from '../guidelines/guidelines.service';
-import { runRuleChecks } from '../guidelines/rules.engine';
+import { getGuidelineText } from '../guidelines/guidelines.service';
+import { getRulesForSemester } from '../../../guidelines/ruleLoader';
+import { runRuleChecks } from '../../../guidelines/rules.engine';
 import { runFormattingRules } from '../rules/formatting';
 import { runReferenceRules } from '../rules/reference';
 import { retrieveGuidelineContext } from '../rag/rag.service';
-import { emitSubmissionUpdate } from '../realtime/submission.socket';
+import { emitSubmissionUpdate, emitReviewComplete } from '../realtime/submission.socket';
 import { logger } from '../../utils/logger';
 
 const prisma = new PrismaClient();
@@ -35,6 +37,49 @@ const withTimeout = async <T>(promise: Promise<T>, ms: number, label: string) =>
   } finally {
     clearTimeout(timeoutId!);
   }
+};
+
+const detectSemesterAndUniversity = (text: string): { semester: string | null; university: string | null } => {
+  const lowerText = text.toLowerCase();
+  
+  let semester: string | null = null;
+  
+  const has8th = lowerText.includes('eighth semester') || 
+                 lowerText.includes('8th semester') || 
+                 lowerText.includes('8th sem') || 
+                 lowerText.includes('internship') || 
+                 /\bproject\s+iii\b/i.test(text);
+                 
+  const has6th = lowerText.includes('sixth semester') || 
+                 lowerText.includes('6th semester') || 
+                 lowerText.includes('6th sem') || 
+                 /\bproject\s+ii\b/i.test(text);
+                 
+  const has4th = lowerText.includes('fourth semester') || 
+                 lowerText.includes('4th semester') || 
+                 lowerText.includes('4th sem') || 
+                 /\bproject\s+i\b/i.test(text);
+
+  if (has8th) {
+    semester = '8th';
+  } else if (has6th) {
+    semester = '6th';
+  } else if (has4th) {
+    semester = '4th';
+  }
+
+  let university: string | null = null;
+  if (lowerText.includes('tribhuvan university') || lowerText.includes('t.u.') || lowerText.includes('tu ')) {
+    university = 'Tribhuvan University';
+  } else if (lowerText.includes('kathmandu university') || lowerText.includes('k.u.') || lowerText.includes('ku ')) {
+    university = 'Kathmandu University';
+  } else if (lowerText.includes('pokhara university') || lowerText.includes('pu ')) {
+    university = 'Pokhara University';
+  } else if (lowerText.includes('purbanchal university') || lowerText.includes('p.u.')) {
+    university = 'Purbanchal University';
+  }
+
+  return { semester, university };
 };
 
 export const processFile = async ({ fileId }: { fileId: string }) => {
@@ -77,15 +122,35 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
       emitSubmissionUpdate(userId, { fileId, status: 'PROCESSING', progress: 50 });
     }
 
-    const rules = getGuidelineRules({
-      university: file.university || '',
-      semester: file.semester || '',
-    });
-    const ruleCheck = rules ? runRuleChecks(text, rules) : null;
+    // Auto-detect semester and university from text
+    const detected = detectSemesterAndUniversity(text);
+    const resolvedSemester = detected.semester || file.semester || '4th';
+    const resolvedUniversity = detected.university || file.university || 'Tribhuvan University';
+
+    // If auto-detected semester/university is different, update in database
+    if (resolvedSemester !== file.semester || resolvedUniversity !== file.university) {
+      logger.info(`Auto-detected adjustments: semester=${resolvedSemester}, university=${resolvedUniversity} (original sem=${file.semester}, univ=${file.university})`);
+      await prisma.fileUpload.update({
+        where: { id: fileId },
+        data: {
+          semester: resolvedSemester,
+          university: resolvedUniversity
+        }
+      });
+    }
+
+    // Load merged rules from the new guidelines system
+    const fileBuffer = fs.readFileSync(file.path);
+    const binaryStr = fileBuffer.toString('binary');
+    const usesTimesNewRoman = binaryStr.includes('TimesNewRoman') || binaryStr.includes('Times-Roman') || binaryStr.includes('TimesNewRomanPS');
+
+    const rules = getRulesForSemester(resolvedSemester);
+    const ruleCheck = runRuleChecks(text, rules, { usesTimesNewRoman });
+    
     const rulesSummary = rules
       ? `Required sections: ${(rules.requiredSections || []).join(', ') || 'None'}; ` +
-        `Abstract words: ${rules.abstract?.minWords ?? 'N/A'}-${rules.abstract?.maxWords ?? 'N/A'}; ` +
-        `References patterns: ${(rules.references?.patterns || []).join(', ') || 'None'}`
+        `Abstract words: 150-300; ` +
+        `References patterns: doi, http, https`
       : null;
 
     const fastMode = (process.env.FAST_MODE || '').toLowerCase() === 'true';
@@ -122,7 +187,7 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
       }
     }
 
-    const formattingResult = runFormattingRules(text);
+    const formattingResult = runFormattingRules(text, ruleCheck.isProposal);
     const referenceResult = runReferenceRules(text);
 
     const aiFeedback: any[] = [];
@@ -161,9 +226,17 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
         aiFeedback.push({ pageRange: 'Full document', ...feedback });
       }
     } else {
+      const formattingPct = (formattingResult.score / 20) * 100;
+      const structurePct = ruleCheck.score ?? 100;
+      const simulatedScore = Math.round((formattingPct + structurePct) / 2);
+
       aiFeedback.push({
         pageRange: 'Skipped (FAST_MODE)',
         summary: 'AI analysis skipped to speed up processing.',
+        content: {
+          score: simulatedScore,
+          feedback: [],
+        },
         issues: [],
         suggestions: [],
       });
@@ -177,14 +250,35 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
         : 0;
     const contentFeedback = aiFeedback.flatMap((entry) => entry?.content?.feedback || []);
 
+    // Formatting Score (max 30) - normalized from raw formattingResult.score (max 20)
+    const normalizedFormattingScore = Math.round((formattingResult.score / 20) * 30);
+    
+    // Structure Score (max 30) - normalized from rules engine ruleCheck.score (max 100)
+    const normalizedStructureScore = Math.round(((ruleCheck.score ?? 100) / 100) * 30);
+    
+    // Content Score (max 40) - normalized from AI content score (max 100)
+    const normalizedContentScore = Math.round((contentScore / 100) * 40);
+
+    const totalScore = normalizedFormattingScore + normalizedStructureScore + normalizedContentScore;
+
     const structuredResult = {
-      formatting: formattingResult,
+      formatting: {
+        ...formattingResult,
+        normalizedScore: normalizedFormattingScore,
+      },
       references: referenceResult,
+      structure: {
+        score: ruleCheck.score ?? 100,
+        normalizedScore: normalizedStructureScore,
+        passed: ruleCheck.passed,
+        summary: ruleCheck.summary,
+      },
       content: {
         score: contentScore,
+        normalizedScore: normalizedContentScore,
         feedback: contentFeedback,
       },
-      total: formattingResult.score + referenceResult.score + contentScore,
+      total: totalScore,
       aiFeedback,
     };
 
@@ -198,21 +292,39 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
       emitSubmissionUpdate(userId, { fileId, status: 'PROCESSING', progress: 90 });
     }
 
-    await prisma.fileUpload.update({
+    const updatedFile = await prisma.fileUpload.update({
       where: { id: fileId },
       data: {
         status: 'COMPLETED',
         analysisResult: safeJson,
-        ruleCheck: ruleCheck ?? Prisma.JsonNull,
+        ruleCheck: ruleCheck ? (JSON.parse(JSON.stringify(ruleCheck)) as any) : Prisma.JsonNull,
         progress: 100,
       },
     });
     if (userId) {
       emitSubmissionUpdate(userId, { fileId, status: 'COMPLETED', progress: 100 });
+
+      // Count total issues across all categories
+      const totalIssueCount =
+        (safeResult.formatting?.issues?.length || 0) +
+        (safeResult.references?.issues?.length || 0) +
+        (safeResult.content?.feedback?.length || 0) +
+        (ruleCheck?.issues?.length || 0);
+
+      emitReviewComplete(userId, {
+        fileId,
+        status: 'COMPLETED',
+        documentName: updatedFile.originalName,
+        totalScore: totalScore,
+        issueCount: totalIssueCount,
+        formatting: normalizedFormattingScore,
+        structure: normalizedStructureScore,
+        content: normalizedContentScore,
+      });
     }
   } catch (err: any) {
     logger.error('Processing failed', err);
-    await prisma.fileUpload.update({
+    const failedFile = await prisma.fileUpload.update({
       where: { id: fileId },
       data: {
         status: 'FAILED',
@@ -225,6 +337,12 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
         fileId,
         status: 'FAILED',
         progress: 0,
+        errorMessage: err?.message || 'Processing failed',
+      });
+      emitReviewComplete(userId, {
+        fileId,
+        status: 'FAILED',
+        documentName: failedFile.originalName,
         errorMessage: err?.message || 'Processing failed',
       });
     }

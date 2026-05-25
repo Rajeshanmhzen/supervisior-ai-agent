@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import InputField from '../../components/shared/InputField'
 import AnimatedButton from '../../components/shared/AnimatedButton'
+import { Link } from 'react-router-dom'
 
 interface LoginFormProps {
   firstName: string
@@ -65,7 +66,7 @@ const LoginForm = (props: LoginFormProps) => {
       {fieldErrors?.password && <span className="text-[10px] text-red-500">{fieldErrors.password}</span>}
       <div className="flex items-center justify-between text-[10px] font-semibold tracking-normal text-primary -mt-2">
         <span className="text-[10px] text-red-500">{error}</span>
-        <a href="/forgot-password" className="hover:underline">Forgot password?</a>
+        <Link to="/forgot-password" className="hover:underline">Forgot password?</Link>
       </div>
       <AnimatedButton
         type="submit"
@@ -107,7 +108,7 @@ const LoginForm = (props: LoginFormProps) => {
       <div className="mt-4 text-center">
         <p className="text-xs text-on-surface-variant">
           New to Validator?{' '}
-          <a href="/register" className="font-semibold text-primary hover:underline">Create Account</a>
+          <Link to="/register" className="font-semibold text-primary hover:underline">Create Account</Link>
         </p>
       </div>
     </form>

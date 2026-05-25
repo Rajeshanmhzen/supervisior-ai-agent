@@ -1,0 +1,21 @@
+{
+  "semester": "8th",
+  "version": "TU BCA Project III (CACS452)",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_8th.pdf"],
+  "proposalSections": [
+    "Introduction",
+    "Problem Statement",
+    "Objectives",
+    "Methodology",
+    "Gantt Chart",
+    "Expected Outcome",
+    "References"
+  ],
+  "methodologySubSections": [
+    "Requirement Identification",
+    "Feasibility Study",
+    "High Level Design of System"
+  ],
+  "formattingOverrides": {}
+}

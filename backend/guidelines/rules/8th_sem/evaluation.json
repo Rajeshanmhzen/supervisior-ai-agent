@@ -1,0 +1,20 @@
+{
+  "semester": "8th",
+  "version": "TU BCA Project III (CACS452)",
+  "lastUpdated": "2026-05-19",
+  "sources": ["source/bca_8th.pdf"],
+  "evaluationCriteria": {
+    "proposalDefense": 10,
+    "midtermWork": 70,
+    "finalDefense": 20
+  },
+  "scoring": {
+    "total": 100,
+    "breakdown": [
+      { "stage": "Proposal Defense", "weight": 10 },
+      { "stage": "Work Done", "weight": 60 },
+      { "stage": "Documentation", "weight": 10 },
+      { "stage": "Final Defense", "weight": 20 }
+    ]
+  }
+}

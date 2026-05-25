@@ -1,0 +1,78 @@
+{
+  "version": "TU BCA Common Report Formatting Guidelines 2024-2025",
+  "lastUpdated": "2026-05-19",
+  "sources": [
+    "source/bca_4th.pdf",
+    "source/bca_6th.pdf",
+    "source/bca_8th.pdf",
+    "source/bca_internship.pdf"
+  ],
+  "formatting": {
+    "font": "Times New Roman",
+    "bodySize": 12,
+    "chapterTitleSize": 16,
+    "sectionTitleSize": 14,
+    "subSectionTitleSize": 12,
+    "lineSpacing": 1.5,
+    "alignment": "justified",
+    "margins": {
+      "top": 1,
+      "bottom": 1,
+      "left": 1.25,
+      "right": 1
+    },
+    "pageNumbering": {
+      "preliminary": "roman",
+      "main": "arabic",
+      "startMainAt": 1,
+      "position": "bottom-center"
+    },
+    "paperSize": "A4"
+  },
+  "headings": {
+    "chapter": {
+      "bold": true,
+      "size": 16,
+      "alignment": "center"
+    },
+    "section": {
+      "bold": true,
+      "size": 14
+    },
+    "subsection": {
+      "bold": true,
+      "size": 12
+    }
+  },
+  "figuresAndTables": {
+    "figureCaption": {
+      "position": "below",
+      "alignment": "center",
+      "bold": true,
+      "size": 12,
+      "prefix": "Figure"
+    },
+    "tableCaption": {
+      "position": "above",
+      "alignment": "center",
+      "bold": true,
+      "size": 12,
+      "prefix": "Table"
+    }
+  },
+  "referencing": {
+    "style": "IEEE",
+    "required": true
+  },
+  "requiredPreliminaryPages": [
+    "Cover Page",
+    "Supervisor’s Recommendation / Certificate",
+    "Letter of Approval",
+    "Abstract",
+    "Acknowledgement",
+    "Table of Contents",
+    "List of Abbreviations",
+    "List of Figures",
+    "List of Tables"
+  ]
+}

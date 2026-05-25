@@ -6,6 +6,7 @@
     "verbatimModuleSyntax": false,
     "target": "ES2022",
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
 
     "sourceMap": true,
     "declaration": true,
