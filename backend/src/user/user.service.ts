@@ -35,7 +35,10 @@ export const userService = (app: FastifyInstance) => {
   const editUser = async (id: string, data: any) => {
     const user = await repo.findById(id);
     if (!user) throw new Error("User not found");
-    await repo.updateById(id, data);
+    const { fullName } = data;
+    if (!fullName?.trim()) throw new Error("Full name is required");
+    const updated = await repo.updateById(id, { fullName: fullName.trim() });
+    return updated;
   };
   const editProfileImage = async (id: string, file: any) => {
     const user = await repo.findById(id);

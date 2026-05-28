@@ -111,7 +111,9 @@ export const findSectionIndex = (text: string, sectionName: string): number => {
                       /\bpage\b\s*\d+/i.test(lineLower) ||
                       (sectionName.toLowerCase() !== 'cover page' && lineLower.includes('table of contents'));
 
-    if (!isInsideTOC && !isTOCLine) {
+    const isPreliminary = ['list of figures', 'list of tables', 'list of abbreviations', 'acknowledgement', 'abstract'].includes(sectionName.toLowerCase());
+
+    if ((!isInsideTOC || isPreliminary) && !isTOCLine) {
       return bestMatch.index;
     }
 

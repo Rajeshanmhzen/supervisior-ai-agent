@@ -40,14 +40,14 @@ const Header = () => {
         <div
           className={`flex justify-between items-center px-8 h-20 transition-all duration-300 ease-out ${
             isScrolled
-              ? 'w-[80%] mt-[10px] rounded-full bg-white/80 backdrop-blur-xl shadow-lg'
-              : 'w-full mt-0 bg-white'
+              ? 'w-[80%] mt-[10px] rounded-full bg-white/80 backdrop-blur-xl shadow-lg dark:bg-slate-900/80'
+              : 'w-full mt-0 bg-white dark:bg-slate-900'
           }`}
         >
         <div className="text-2xl font-black tracking-tighter text-blue-600 font-headline flex items-center gap-2">
           <MoniveoLogo />
                 <span
-                  className="font-manrope text-base font-semibold tracking-tight"
+                  className="brand-text font-manrope text-base font-semibold tracking-tight"
                   style={{ color: "#191c1e" }}
                 >
                   Moniveo
@@ -66,7 +66,7 @@ const Header = () => {
                 className={
                   isActive
                     ? 'text-primary font-bold'
-                    : 'text-slate-600 hover:text-blue-600 transition-colors'
+                    : 'text-slate-600 hover:text-blue-600 transition-colors dark:text-slate-300 dark:hover:text-blue-300'
                 }
                 href={item.link}
               >
@@ -104,7 +104,7 @@ const Header = () => {
             <AnimatedButton
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-6 py-2.5 rounded-full font-headline text-sm font-bold border border-primary text-primary hover:opacity-90 transition-colors duration-200 cursor-pointer"
+            className="px-6 py-2.5 rounded-full font-headline text-sm font-bold border border-primary text-primary hover:opacity-90 transition-colors duration-200 cursor-pointer"
               rippleColor="bg-primary/10"
             >
               Dashboard

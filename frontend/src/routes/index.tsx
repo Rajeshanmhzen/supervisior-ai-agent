@@ -30,6 +30,8 @@ const ProjectViewPage = lazy(() => import("../pages/dashboard/ProjectViewPage"))
 const UserProfilePage = lazy(() => import("../pages/dashboard/UserProfilePage"));
 const GuidelinePage = lazy(() => import("../pages/dashboard/GuidelinePage"));
 const SyllabusPage = lazy(() => import("../pages/dashboard/SyllabusPage"));
+const ChangePasswordPage = lazy(() => import("../pages/dashboard/ChangePasswordPage"));
+const PreferencesPage = lazy(() => import("../pages/dashboard/PreferencesPage"));
 
 const withSuspense = (element: JSX.Element, fallback?: JSX.Element) => (
   <Suspense fallback={fallback ?? <HomeSkeleton />}>
@@ -96,14 +98,8 @@ const router = createBrowserRouter([
                     element: withSuspense(<SyllabusPage />, <DashboardSkeleton />)
                 },
                 {
-                    path: "settings",
-                    element: withSuspense(
-                        <DashboardSectionPage
-                            title="Settings"
-                            description="Manage account and system preferences."
-                        />,
-                        <DashboardSkeleton />
-                    )
+                    path: "change-password",
+                    element: withSuspense(<ChangePasswordPage />, <DashboardSkeleton />)
                 },
                 {
                     path: "notifications",
@@ -114,6 +110,10 @@ const router = createBrowserRouter([
                         />,
                         <DashboardSkeleton />
                     )
+                },
+                {
+                    path: "preferences",
+                    element: withSuspense(<PreferencesPage />, <DashboardSkeleton />)
                 },
                 {
                     path: "user",

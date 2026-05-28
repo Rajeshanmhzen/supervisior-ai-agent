@@ -41,3 +41,12 @@ export const extractPdfPages = async (filePath: string) => {
 
   return pages;
 };
+
+export const extractDocxText = async (filePath: string) => {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found: ${filePath}`);
+  }
+  const mammoth = require('mammoth');
+  const result = await mammoth.extractRawText({ path: filePath });
+  return result.value || '';
+};

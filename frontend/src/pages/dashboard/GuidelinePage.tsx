@@ -1,5 +1,4 @@
-import React from "react";
-import { FiBook, FiBookOpen, FiCheckCircle, FiCheckSquare, FiFileText, FiInfo, FiList } from "react-icons/fi";
+import { FiBook,  FiCheckSquare, FiInfo, FiList } from "react-icons/fi";
 
 const GuidelinePage = () => {
   return (

@@ -49,7 +49,7 @@ export const runReferenceRules = (text: string): RuleCheckResult => {
       fix: 'Add a "References" section and list all cited sources.',
     });
   } else {
-    const doiOrUrl = /(doi:\s*10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+)|(https?:\/\/\S+)/i;
+    const doiOrUrl = /(?:doi\s*[:=]?\s*10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+)|(?:https?:\/\/\S+)|(?:10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+)/i;
     if (!doiOrUrl.test(refsText)) {
       issues.push({
         category: 'references',

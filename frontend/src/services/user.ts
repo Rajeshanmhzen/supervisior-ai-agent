@@ -1,6 +1,13 @@
 import { apiRequest, apiUpload } from './api';
 
 export const userService = {
+  editProfile: async (id: string, fullName: string) => {
+    return apiRequest<{ user: UserProfile }>(`/user/edit/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ fullName }),
+    });
+  },
+
   uploadProfileImage: async (id: string, file: File): Promise<{ profilePic: string }> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -56,6 +63,14 @@ export const userService = {
     const base = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
     return `${base}/submissions/file/${id}`;
   },
+};
+
+export type UserProfile = {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  profilePic?: string | null;
 };
 
 export type Submission = {

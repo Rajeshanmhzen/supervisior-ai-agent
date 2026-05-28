@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import fs from 'fs';
-import { extractPdfPages, extractPdfText } from '../file/file.service';
+import { extractPdfPages, extractPdfText, extractDocxText } from '../file/file.service';
 import { analyzeWithAI } from '../ai/ai.service';
 import { getGuidelineText } from '../guidelines/guidelines.service';
 import { getRulesForSemester } from '../../../guidelines/ruleLoader';
@@ -100,15 +100,21 @@ export const processFile = async ({ fileId }: { fileId: string }) => {
     let text = '';
     let pages: string[] = [];
     try {
-      text = await withTimeout(extractPdfText(file.path), 60_000, 'PDF extraction');
-      pages = await withTimeout(extractPdfPages(file.path), 60_000, 'PDF page extraction');
+      if (file.path.endsWith('.docx') || file.path.endsWith('.doc')) {
+        text = await withTimeout(extractDocxText(file.path), 60_000, 'DOCX extraction');
+        // split text into ~3000 character chunks to simulate pages
+        pages = text.match(/[\s\S]{1,3000}/g) || [];
+      } else {
+        text = await withTimeout(extractPdfText(file.path), 60_000, 'PDF extraction');
+        pages = await withTimeout(extractPdfPages(file.path), 60_000, 'PDF page extraction');
+      }
     } catch (extractErr: any) {
-      logger.error('PDF extraction failed', extractErr);
+      logger.error('File text extraction failed', extractErr);
       await prisma.fileUpload.update({
         where: { id: fileId },
         data: {
           status: 'FAILED',
-          errorMessage: 'Failed to extract text from PDF. The file may be corrupted or not a valid PDF.',
+          errorMessage: 'Failed to extract text from file. The file may be corrupted or unsupported.',
         } as any,
       });
       return;

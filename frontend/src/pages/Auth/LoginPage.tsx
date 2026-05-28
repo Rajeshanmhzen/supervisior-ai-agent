@@ -75,14 +75,15 @@ const LoginPage = () => {
       if (result.refreshToken) authStorage.setRefreshToken(result.refreshToken)
       notifications.show({ title: 'Welcome back', message: 'Login successful', color: 'green' })
       navigate('/dashboard')
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!isMountedRef.current) return
-      const message = err?.message || 'Login failed'
+      const message = err instanceof Error ? err.message : 'Login failed'
       setError(message)
       notifications.show({ title: 'Login failed', message, color: 'red' })
     } finally {
-      if (!isMountedRef.current) return
-      setIsLoading(false)
+      if (isMountedRef.current) {
+        setIsLoading(false)
+      }
     }
   }, [data.email, data.password, navigate])
 

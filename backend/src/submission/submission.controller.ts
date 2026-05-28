@@ -70,11 +70,7 @@ export const submissionController = (app: FastifyInstance) => {
     return reply.code(200).send({ message: 'Submission found', submission });
   };
 
-  /**
-   * Build a rich, contextual fallback response from the actual analysis data.
-   * Unlike the old approach that returned one generic message, this examines
-   * the real issues found and generates a detailed, specific reply.
-   */
+
   const buildSmartFallback = (
     message: string,
     submission: any

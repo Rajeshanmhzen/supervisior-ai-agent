@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { FiCamera, FiLock, FiUser } from 'react-icons/fi';
+import { FiCamera, FiMail, FiSave, FiShield, FiUser } from 'react-icons/fi';
 import { authStorage } from '../../services/authStorage';
 import { userService, type Submission } from '../../services/user';
+import { notifications } from '@mantine/notifications';
+import InputField from '../../components/shared/InputField';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
@@ -24,12 +26,10 @@ const UserProfilePage = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [fullName, setFullName] = useState(user?.fullName ?? '');
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState('');
 
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [page, setPage] = useState(1);
@@ -40,6 +40,10 @@ const UserProfilePage = () => {
     const unsubscribe = authStorage.subscribe(() => setUser(authStorage.getUser()));
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    setFullName(user?.fullName ?? '');
+  }, [user?.fullName]);
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -68,29 +72,58 @@ const UserProfilePage = () => {
       const updatedUser = { ...user, profilePic: res.profilePic };
       authStorage.setUser(updatedUser);
       setUser(updatedUser);
+      notifications.show({
+        title: 'Profile photo updated',
+        message: 'Your new profile photo has been saved.',
+        color: 'green',
+      });
     } catch (err: any) {
-      setUploadError(err.message || 'Upload failed');
+      const message = err.message || 'Upload failed';
+      setUploadError(message);
       setImagePreview(user.profilePic ? `${API_BASE_URL.replace('/api/v1', '')}/${user.profilePic}` : null);
+      notifications.show({
+        title: 'Photo upload failed',
+        message,
+        color: 'red',
+      });
     } finally {
       setUploading(false);
     }
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    setPasswordError('');
-    setPasswordSuccess('');
-    setPasswordLoading(true);
+    setProfileError('');
+    setProfileSuccess('');
+    setProfileLoading(true);
     try {
-      await userService.editPassword(user.id, currentPassword, newPassword);
-      setPasswordSuccess('Password updated successfully');
-      setCurrentPassword('');
-      setNewPassword('');
+      const res = await userService.editProfile(user.id, fullName);
+      const updatedUser = {
+        id: res.user.id,
+        fullName: res.user.fullName,
+        email: res.user.email,
+        role: res.user.role,
+        profilePic: res.user.profilePic,
+      };
+      authStorage.setUser(updatedUser);
+      setUser(updatedUser);
+      setProfileSuccess('Profile updated successfully');
+      notifications.show({
+        title: 'Profile updated',
+        message: 'Your user details have been saved.',
+        color: 'green',
+      });
     } catch (err: any) {
-      setPasswordError(err.message || 'Failed to update password');
+      const message = err.message || 'Failed to update profile';
+      setProfileError(message);
+      notifications.show({
+        title: 'Profile update failed',
+        message,
+        color: 'red',
+      });
     } finally {
-      setPasswordLoading(false);
+      setProfileLoading(false);
     }
   };
 
@@ -104,82 +137,108 @@ const UserProfilePage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Profile Card */}
       <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-6">
-          <FiUser className="text-slate-500" />
-          <h2 className="text-base font-semibold text-slate-900">Profile</h2>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <div className="h-24 w-24 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-2xl font-bold text-slate-600">
-              {imagePreview ? (
-                <img src={imagePreview} alt="Profile" className="h-full w-full object-cover" />
-              ) : (
-                initials
-              )}
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <FiUser className="text-slate-500" />
+              <h1 className="text-xl font-semibold text-slate-900">User Profile</h1>
             </div>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center shadow border-2 border-white hover:opacity-90 disabled:opacity-60"
-            >
-              <FiCamera size={14} />
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageChange} />
+            <p className="mt-2 text-sm text-slate-500">
+              Update your account details and profile photo.
+            </p>
           </div>
-          {/* Info */}
-          <div className="flex-1 space-y-1 text-center sm:text-left">
-            <p className="text-xl font-semibold text-slate-900">{user?.fullName}</p>
-            <p className="text-sm text-slate-500">{user?.email}</p>
-            <span className="inline-block mt-1 rounded-full bg-primary/10 px-3 py-0.5 text-xs font-semibold text-primary capitalize">
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center dark:bg-slate-900">
+            <div className="relative mx-auto h-28 w-28">
+              <div className="h-28 w-28 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-3xl font-bold text-slate-600">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute bottom-1 right-1 h-9 w-9 rounded-full bg-primary text-white flex items-center justify-center shadow border-2 border-white hover:opacity-90 disabled:opacity-60 dark:border-slate-900"
+                aria-label="Upload profile photo"
+              >
+                <FiCamera size={15} />
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageChange} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold text-slate-900">{user?.fullName ?? 'User'}</h2>
+            <p className="mt-1 truncate text-sm text-slate-500">{user?.email}</p>
+            <span className="mt-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary capitalize">
               {user?.role?.toLowerCase()}
             </span>
-            {uploading && <p className="text-xs text-slate-400 mt-1">Uploading...</p>}
-            {uploadError && <p className="text-xs text-red-500 mt-1">{uploadError}</p>}
+            {uploading && <p className="mt-3 text-xs text-slate-400">Uploading photo...</p>}
+            {uploadError && <p className="mt-3 text-xs text-red-500">{uploadError}</p>}
           </div>
-        </div>
-      </div>
 
-      {/* Change Password */}
-      <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-6">
-          <FiLock className="text-slate-500" />
-          <h2 className="text-base font-semibold text-slate-900">Change Password</h2>
+          <form onSubmit={handleProfileUpdate} className="space-y-5">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Edit Details</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Keep your profile information accurate for project records.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <InputField
+                  label="Full Name"
+                  name="fullName"
+                  value={fullName}
+                  onChange={setFullName}
+                  rightAdornment={<FiUser className="text-slate-400" />}
+                />
+              </div>
+
+              <div>
+                <InputField
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={user?.email ?? ''}
+                  onChange={() => {}}
+                  readOnly
+                  rightAdornment={<FiMail className="text-slate-400" />}
+                />
+              </div>
+
+              <div>
+                <InputField
+                  label="Role"
+                  name="role"
+                  value={user?.role?.toLowerCase() ?? ''}
+                  onChange={() => {}}
+                  readOnly
+                  rightAdornment={<FiShield className="text-slate-400" />}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
+              <div>
+                {profileError && <p className="text-sm text-red-500">{profileError}</p>}
+                {profileSuccess && <p className="text-sm text-emerald-600">{profileSuccess}</p>}
+              </div>
+              <button
+                type="submit"
+                disabled={profileLoading}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+              >
+                <FiSave className="text-base" />
+                {profileLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         </div>
-        <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">Current Password</label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-primary"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">New Password</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-primary"
-            />
-          </div>
-          {passwordError && <p className="text-xs text-red-500">{passwordError}</p>}
-          {passwordSuccess && <p className="text-xs text-emerald-600">{passwordSuccess}</p>}
-          <button
-            type="submit"
-            disabled={passwordLoading}
-            className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
-          >
-            {passwordLoading ? 'Updating...' : 'Update Password'}
-          </button>
-        </form>
       </div>
 
       {/* Submissions */}
@@ -210,9 +269,9 @@ const UserProfilePage = () => {
                 <tbody className="divide-y divide-slate-100">
                   {submissions.map((s) => (
                     <tr key={s.id}>
-                      <td className="py-3 pr-4 font-medium text-slate-800 max-w-[180px] truncate">{s.originalName}</td>
+                      <td className="py-3 pr-4 font-medium text-slate-800 max-w-45 truncate">{s.originalName}</td>
                       <td className="py-3 pr-4 text-slate-600">{s.semester}</td>
-                      <td className="py-3 pr-4 text-slate-600 max-w-[160px] truncate">{s.university}</td>
+                      <td className="py-3 pr-4 text-slate-600 max-w-40 truncate">{s.university}</td>
                       <td className="py-3 pr-4 text-slate-500">{formatSize(s.size)}</td>
                       <td className="py-3 pr-4">
                         <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColors[s.status]}`}>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PageWrapper from "../../components/shared/PageWrapper";
-import InputField from "../../components/shared/InputField";
+import OTPInput from "../../components/shared/OTPInput";
 import Button from "../../components/shared/Button";
 import AnimatedButton from "../../components/shared/AnimatedButton";
 import { authService } from "../../services/auth";
@@ -122,12 +122,17 @@ const VerifyCodePage = () => {
               await handleSubmit();
             }}
           >
-            <InputField
-              label="Verification Code"
-              name="code"
-              value={code}
-              onChange={handleCodeChange}
-            />
+            <div className="mb-2">
+              <label className="block text-sm font-medium text-on-surface-variant mb-4 text-center">
+                Verification Code
+              </label>
+              <OTPInput
+                length={6}
+                value={code}
+                onChange={handleCodeChange}
+                disabled={isLoading}
+              />
+            </div>
             <div className="flex items-center justify-between text-[10px]">
               <span className="text-red-500">{error}</span>
               <AnimatedButton

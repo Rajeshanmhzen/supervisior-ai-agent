@@ -5,8 +5,10 @@ import { hashToken, randomNumericCode, randomToken } from '../utils/crypto';
 import { signAccessToken } from '../utils/jwt';
 import { SignOptions } from 'jsonwebtoken';
 import { Role } from '@prisma/client';
+import emailSender from '../utils/emailSender';
 const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 30);
 const RESET_TOKEN_TTL_MIN = Number(process.env.RESET_TOKEN_TTL_MIN || 10);
+const EMAIL_DEV_FALLBACK = String(process.env.EMAIL_DEV_FALLBACK || 'true').toLowerCase() !== 'false';
 
 const calcExpiry = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 const calcExpiryMinutes = (mins: number) => new Date(Date.now() + mins * 60 * 1000);
@@ -103,13 +105,31 @@ export const authService = (app: FastifyInstance) => {
         tokenHash: hashToken(code),
         expiresAt: calcExpiryMinutes(RESET_TOKEN_TTL_MIN),
       });
+      try {
+        await emailSender({
+          from: process.env.SMTP_FROM || (process.env.SMTP_USER as string),
+          to: user.email,
+          subject: 'Your Moniveo password reset code',
+          text: `Your Moniveo password reset code is ${code}. This code expires in ${RESET_TOKEN_TTL_MIN} minutes. If you did not request this, you can ignore this email.`,
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+              <h2 style="margin: 0 0 12px;">Password reset code</h2>
+              <p>Use this code to reset your Moniveo password:</p>
+              <p style="font-size: 28px; font-weight: 700; letter-spacing: 6px; margin: 20px 0;">${code}</p>
+              <p>This code expires in ${RESET_TOKEN_TTL_MIN} minutes.</p>
+              <p style="color: #6b7280; font-size: 13px;">If you did not request this, you can safely ignore this email.</p>
+            </div>
+          `,
+        });
+      } catch (mailError) {
+        if (!EMAIL_DEV_FALLBACK) throw mailError;
+        app.log.warn({ err: mailError, email: user.email, code }, 'SMTP send failed; using development reset-code fallback');
+      }
       await app.prisma.emailLog.update({
         where: { id: log.id },
         data: { status: 'SEND' },
       });
-      // TEMPORARY: Log code to console since email server is not configured
-      console.log(`\n\n=== PASSWORD RESET CODE ===\nEmail: ${user.email}\nCode: ${code}\n===========================\n\n`);
-      return { ok: true, code };
+      return { ok: true };
     } catch (err) {
       await app.prisma.emailLog.update({
         where: { id: log.id },

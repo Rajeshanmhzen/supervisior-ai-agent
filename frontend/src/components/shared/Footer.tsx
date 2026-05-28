@@ -78,19 +78,35 @@ export default function Footer() {
         .email-input:focus { outline: none; }
         .legal-link { color: #8a9099; transition: color 0.15s ease; }
         .legal-link:hover { color: #191c1e; }
+        .dark .footer-root,
+        .dark .footer-band,
+        .dark .footer-legal { background-color: #0f172a !important; }
+        .dark .footer-upper { background-color: #111827 !important; }
+        .dark .footer-title,
+        .dark .footer-brand,
+        .dark .footer-follow { color: #f8fafc !important; }
+        .dark .footer-link,
+        .dark .legal-link,
+        .dark .footer-muted { color: #cbd5e1 !important; }
+        .dark .footer-link:hover,
+        .dark .legal-link:hover { color: #ffffff !important; }
+        .dark .footer-email,
+        .dark .social-btn { background-color: #1f2937 !important; color: #f8fafc !important; }
+        .dark .footer-email input { color: #f8fafc !important; }
+        .dark .social-btn:hover { background: #334155 !important; }
       `}</style>
 
-      <footer className="footer-root w-full" style={{ backgroundColor: "#f8f9fb" }}>
+      <footer className="footer-root footer-band w-full" style={{ backgroundColor: "#f8f9fb" }}>
 
         {/* --- Upper nav band --- */}
-        <div style={{ backgroundColor: "#f3f4f6" }}>
+        <div className="footer-upper" style={{ backgroundColor: "#f3f4f6" }}>
           <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16 py-14">
             <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
 
               {NAV_SECTIONS.map((section) => (
                 <div key={section.title} className="flex flex-col gap-4">
                   <p
-                    className="font-manrope text-xs tracking-widest uppercase"
+                    className="footer-title font-manrope text-xs tracking-widest uppercase"
                     style={{ color: "#191c1e", fontWeight: 800, letterSpacing: "0.1em" }}
                   >
                     {section.title}
@@ -108,7 +124,7 @@ export default function Footer() {
               {/* Subscribe - spans full row on small, 1 col on lg+ */}
               <div className="col-span-2 md:col-span-4 lg:col-span-1 flex flex-col gap-5">
                 <p
-                  className="font-manrope text-xs tracking-widest uppercase"
+                    className="footer-title font-manrope text-xs tracking-widest uppercase"
                   style={{ color: "#191c1e", fontWeight: 800, letterSpacing: "0.1em" }}
                 >
                   SUBSCRIBE
@@ -116,7 +132,7 @@ export default function Footer() {
 
                 {/* Email pill */}
                 <div
-                  className="flex items-center rounded-full overflow-hidden"
+                  className="footer-email flex items-center rounded-full overflow-hidden"
                   style={{
                     backgroundColor: "#ffffff",
                     boxShadow: "0 4px 16px rgba(17,24,39,0.06)",
@@ -145,7 +161,7 @@ export default function Footer() {
                 {/* Social row */}
                 <div className="flex items-center gap-3 flex-wrap">
                   <span
-                    className="text-sm font-semibold font-manrope"
+                    className="footer-follow text-sm font-semibold font-manrope"
                     style={{ color: "#191c1e" }}
                   >
                     Follow Us
@@ -176,20 +192,20 @@ export default function Footer() {
         </div>
 
         {/* --- Bottom legal band --- */}
-        <div style={{ backgroundColor: "#f8f9fb" }}>
+        <div className="footer-legal" style={{ backgroundColor: "#f8f9fb" }}>
           <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16 py-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
 
             <div className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-4">
               <div className="flex items-center gap-2">
                 <MoniveoLogo />
                 <span
-                  className="font-manrope text-base font-semibold tracking-tight"
+                  className="footer-brand font-manrope text-base font-semibold tracking-tight"
                   style={{ color: "#191c1e" }}
                 >
                   Moniveo
                 </span>
               </div>
-              <span className="text-xs" style={{ color: "#8a9099" }}>
+              <span className="footer-muted text-xs" style={{ color: "#8a9099" }}>
                 � 2023 Moniveo, Inc.
               </span>
             </div>

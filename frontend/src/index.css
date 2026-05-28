@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-on-primary-fixed: #00174b;
@@ -60,6 +61,81 @@ body {
   color: var(--color-on-surface);
 }
 
+.dark {
+  --color-background: #0f172a;
+  --color-surface: #111827;
+  --color-surface-bright: #111827;
+  --color-surface-container-lowest: #111827;
+  --color-surface-container-low: #1f2937;
+  --color-surface-container: #1f2937;
+  --color-surface-container-high: #273449;
+  --color-surface-container-highest: #334155;
+  --color-surface-variant: #334155;
+  --color-on-background: #f8fafc;
+  --color-on-surface: #f8fafc;
+  --color-on-surface-variant: #cbd5e1;
+  --color-outline: #64748b;
+  --color-outline-variant: #334155;
+  --color-primary: #60a5fa;
+  --color-primary-container: #2563eb;
+}
+
+.dark body {
+  background-color: #0f172a;
+  color: #e5e7eb;
+}
+
+.dark .bg-\[\#f4f6fb\],
+.dark .bg-white,
+.dark .bg-white\/95 {
+  background-color: #111827 !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background-color: #1f2937 !important;
+}
+
+.dark .hover\:bg-white:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1f2937 !important;
+}
+
+.dark .hover\:bg-slate-200:hover,
+.dark .hover\:bg-slate-200\/50:hover {
+  background-color: #334155 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+
+.dark .brand-text {
+  color: #f8fafc !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100 {
+  border-color: #334155 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
 .font-headline {
   font-family: var(--font-headline);
 }
@@ -89,6 +165,10 @@ body {
   border-radius: 8px;
   outline: none;
   font-size: 1em;
+}
+
+.inputBox .labelline.is-floated {
+  background-color: var(--color-background);
 }
 
 .inputBox label{
@@ -126,5 +206,5 @@ body {
   color: var(--color-primary);
   padding: 0 10px;
   z-index: 1111;
-  background-color: #ffff;
+  background-color: var(--color-background);
 }

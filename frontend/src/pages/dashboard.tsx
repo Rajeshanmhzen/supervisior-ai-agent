@@ -14,13 +14,14 @@ import {
   FiBell,
   FiBookOpen,
   FiChevronDown,
-  FiClock,
-  FiFileText,
   FiFolder,
   FiGrid,
   FiLock,
   FiLogOut,
+  FiMonitor,
+  FiMoon,
   FiSettings,
+  FiSun,
   FiUser,
   FiBook,
 } from "react-icons/fi";
@@ -28,6 +29,8 @@ import { authStorage } from "../services/authStorage";
 import MoniveoLogo from "../components/shared/MoniveoLogo";
 import { authService } from "../services/auth";
 import UploadProjectModal from "../components/shared/UploadProjectModal";
+import { themeStorage, type ThemeMode } from "../services/theme";
+import { notifications } from "@mantine/notifications";
 
 type NavItem = { label: string; icon: IconType; link: string };
 
@@ -39,12 +42,13 @@ const navItems: NavItem[] = [
 ];
 
 const manageItems: NavItem[] = [
-  { label: "Settings", icon: FiSettings, link: "/dashboard/settings" },
+  { label: "Change Password", icon: FiLock, link: "/dashboard/change-password" },
   {
     label: "Notifications",
     icon: FiBell,
     link: "/dashboard/notifications",
   },
+  { label: "Preferences", icon: FiSettings, link: "/dashboard/preferences" },
   { label: "User", icon: FiUser, link: "/dashboard/user" },
 ];
 
@@ -70,6 +74,7 @@ const RefreshContext = createContext<{ trigger: number; setTrigger: (n: number) 
   setTrigger: () => {},
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDashboardConfirm = () => {
   const context = useContext(DashboardConfirmContext);
   if (!context) {
@@ -78,14 +83,13 @@ export const useDashboardConfirm = () => {
   return context;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useUploadProjectModal = () => {
   const context = useContext(UploadProjectModalContext);
-  if (!context) {
-    throw new Error("useUploadProjectModal must be used within DashboardPage.");
-  }
-  return context;
+  return context ?? (() => {});
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useRefresh = () => useContext(RefreshContext);
 
 const DashboardPage = () => {
@@ -93,6 +97,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(() => authStorage.getUser());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => themeStorage.getMode());
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -109,6 +114,8 @@ const DashboardPage = () => {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => themeStorage.subscribe(() => setThemeMode(themeStorage.getMode())), []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -161,14 +168,25 @@ const DashboardPage = () => {
   const handleLogout = async () => {
     try {
       await authService.logout();
+      notifications.show({ title: "Logged out", message: "You have been successfully logged out." });
     } catch {
-      // ignore logout errors
+      console.log("Failed to log out.");
+      notifications.show({ title: "Logout failed", message: "Failed to log out." });
     } finally {
       authStorage.clear();
       setIsUserMenuOpen(false);
       navigate("/login");
     }
   };
+
+  const cycleThemeMode = () => {
+    const nextMode: ThemeMode =
+      themeMode === "light" ? "dark" : themeMode === "dark" ? "system" : "light";
+    setThemeMode(nextMode);
+    themeStorage.setMode(nextMode);
+  };
+
+  const ThemeIcon = themeMode === "light" ? FiSun : themeMode === "dark" ? FiMoon : FiMonitor;
 
   const openConfirm = useCallback((options: ConfirmOptions) => {
     setConfirmState({
@@ -216,7 +234,7 @@ const DashboardPage = () => {
               <button
                 type="button"
                 onClick={() => setSidebarCollapsed((prev) => !prev)}
-                className="ml-20 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
+                className="ml-20 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                 aria-label={
                   sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
                 }
@@ -239,12 +257,21 @@ const DashboardPage = () => {
               </button>
             </div>
             <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500"
-            >
-              <FiBell className="text-lg" />
-            </button>
+              <button
+                type="button"
+                onClick={cycleThemeMode}
+                className="flex h-9 items-center gap-2 rounded-full border border-slate-200 px-3 text-xs font-semibold capitalize text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                title={`Theme: ${themeMode}. Click to switch.`}
+              >
+                <ThemeIcon className="text-base" />
+                <span>{themeMode}</span>
+              </button>
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              >
+                <FiBell className="text-lg" />
+              </button>
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                 <span className="h-9 w-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
                   {initials}
@@ -255,9 +282,9 @@ const DashboardPage = () => {
           </div>
         </header>
 
-      <div className="mx-auto w-full max-w-screen-2xl px-6 py-8">
+      <div className="mx-auto w-full max-w-screen-2xl px-6">
         <div
-          className={`grid gap-6 grid-cols-1 ${
+          className={`grid min-w-0 gap-6 grid-cols-1 ${
             sidebarCollapsed
               ? "lg:grid-cols-[88px_minmax(0,1fr)]"
               : "lg:grid-cols-[280px_minmax(0,1fr)]"
@@ -265,11 +292,11 @@ const DashboardPage = () => {
         >
           <aside
             className={`${
-              sidebarCollapsed ? "min-w-[88px]" : "min-w-[240px]"
+              sidebarCollapsed ? "lg:w-22" : "lg:w-70"
             }`}
           >
             <div
-              className={`h-full w-full rounded-3xl bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between text-slate-700 transition-all duration-300 ${
+              className={`h-full w-full rounded-3xl bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between text-slate-700 transition-all duration-300 lg:sticky lg:top-18.5 lg:h-[calc(100vh-73px)] ${
                 sidebarCollapsed ? "items-center" : ""
               }`}
             >
@@ -292,8 +319,8 @@ const DashboardPage = () => {
                         title={item.label}
                         className={`flex w-full items-center gap-3 rounded-xl px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap ${
                           isActive
-                            ? "bg-slate-100 text-slate-900"
-                            : "text-slate-600 hover:bg-slate-100"
+                            ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white"
+                            : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                         } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
                       >
                         <Icon className="text-[20px]" />
@@ -326,8 +353,8 @@ const DashboardPage = () => {
                           title={item.label}
                           className={`flex w-full items-center gap-3 rounded-xl px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap ${
                             isActive
-                              ? "bg-slate-100 text-slate-900"
-                              : "text-slate-600 hover:bg-slate-100"
+                              ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white"
+                              : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                           } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
                         >
                           <Icon className="text-[20px]" />
@@ -344,51 +371,16 @@ const DashboardPage = () => {
               </div>
 
               <div className="mt-10 w-full">
-                <div
-                  className={`rounded-2xl bg-slate-100 transition-all ${
-                    sidebarCollapsed ? "p-0" : "p-4"
-                  }`}
-                >
-                  {!sidebarCollapsed && (
-                    <>
-                      <p className="text-xs font-semibold text-slate-800">
-                        Pro Plan
-                      </p>
-                      <p className="mt-1 text-[10px] text-slate-500">
-                        5 projects remaining
-                      </p>
-                      <div className="mt-3 h-2 w-full rounded-full bg-white">
-                        <div className="h-full w-2/3 rounded-full bg-primary"></div>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between text-[10px] font-semibold text-slate-500">
-                        <span>Auto sync</span>
-                        <button
-                          type="button"
-                          className="relative h-5 w-10 rounded-full bg-white"
-                        >
-                          <span className="absolute right-1 top-1 h-3 w-3 rounded-full bg-primary"></span>
-                        </button>
-                      </div>
-                    </>
-                  )}
-                  {sidebarCollapsed && (
-                    <div className="flex items-center justify-center h-16">
-                      <span className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-slate-700">
-                        {initials}
-                      </span>
-                    </div>
-                  )}
-                </div>
                 {!sidebarCollapsed && (
-                  <div className="mt-4 relative w-full" ref={userMenuRef}>
+                  <div className="relative w-full" ref={userMenuRef}>
                     <button
                       type="button"
                       onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                      className="flex w-full items-center gap-3 rounded-2xl bg-slate-100 px-3 py-2 text-left"
+                      className="flex w-full items-center gap-3 rounded-2xl bg-slate-100 px-3 py-2 text-left hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
                       aria-expanded={isUserMenuOpen}
                       aria-haspopup="menu"
                     >
-                      <span className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-slate-700">
+                      <span className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-slate-700 dark:bg-slate-900 dark:text-white">
                         {initials}
                       </span>
                       <div className="min-w-0 flex-1">
@@ -404,7 +396,7 @@ const DashboardPage = () => {
 
                     {isUserMenuOpen && (
                       <div
-                        className="absolute left-0 right-0 bottom-full mb-3 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-xl"
+                        className="absolute left-0 right-0 bottom-full mb-3 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-xl dark:bg-slate-900 dark:text-slate-200"
                         role="menu"
                       >
                         <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
@@ -424,16 +416,16 @@ const DashboardPage = () => {
                           <Link
                             to="/dashboard/user"
                             onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100"
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                             role="menuitem"
                           >
                             <FiUser className="text-base" />
                             Profile
                           </Link>
                           <Link
-                            to="/dashboard/settings"
+                            to="/dashboard/change-password"
                             onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100"
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                             role="menuitem"
                           >
                             <FiLock className="text-base" />
@@ -444,7 +436,7 @@ const DashboardPage = () => {
                           <button
                             type="button"
                             onClick={handleLogout}
-                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-red-50 hover:text-red-600"
+                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-red-50 hover:text-red-600 dark:text-slate-300 dark:hover:bg-red-950/40 dark:hover:text-red-300"
                             role="menuitem"
                           >
                             <FiLogOut className="text-base" />
@@ -459,7 +451,7 @@ const DashboardPage = () => {
             </div>
           </aside>
 
-          <main className="space-y-6">
+          <main className="min-w-0 space-y-6 py-8">
             <Outlet />
           </main>
         </div>

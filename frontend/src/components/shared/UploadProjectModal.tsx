@@ -4,6 +4,7 @@ import { FiFileText, FiImage, FiTrash2, FiX, FiCheck } from "react-icons/fi";
 import { userService } from "../../services/user";
 import { authStorage } from "../../services/authStorage";
 import AnimatedButton from "./AnimatedButton";
+import { notifications } from "@mantine/notifications";
 
 type UploadProjectModalProps = {
   isOpen: boolean;
@@ -67,7 +68,13 @@ const UploadProjectModal = ({ isOpen, onClose, onSuccess }: UploadProjectModalPr
   const handleUpload = async () => {
     const user = authStorage.getUser();
     if (!selectedFile || !semester || !university || !user) {
-      setUploadError("Please fill all fields and select a file");
+      const message = "Please fill all fields and select a file";
+      setUploadError(message);
+      notifications.show({
+        title: "Upload details missing",
+        message,
+        color: "yellow",
+      });
       return;
     }
 
@@ -76,10 +83,21 @@ const UploadProjectModal = ({ isOpen, onClose, onSuccess }: UploadProjectModalPr
 
     try {
       await userService.addSubmission(selectedFile, semester, university, user.id);
+      notifications.show({
+        title: "File uploaded",
+        message: "Your project file was uploaded successfully.",
+        color: "green",
+      });
       onSuccess?.();
       closeModal();
     } catch (err: any) {
-      setUploadError(err.message || "Upload failed");
+      const message = err.message || "Upload failed";
+      setUploadError(message);
+      notifications.show({
+        title: "Upload failed",
+        message,
+        color: "red",
+      });
     } finally {
       setIsUploading(false);
     }
@@ -304,7 +322,7 @@ const UploadProjectModal = ({ isOpen, onClose, onSuccess }: UploadProjectModalPr
           <AnimatedButton
             type="button"
             onClick={closeModal}
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             rippleColor="bg-slate-300/30"
           >
             Cancel

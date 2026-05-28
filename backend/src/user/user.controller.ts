@@ -28,8 +28,8 @@ export const userController = (app: FastifyInstance) => {
   const editUser = async (req: any, reply: any) => {
     const { id } = req.params;
     const data = req.body;
-    await service.editUser(id, data);
-    return reply.code(200).send({ ok: true });
+    const user = await service.editUser(id, data);
+    return reply.code(200).send({ user });
   };
 
   const editProfileImage = async (req: any, reply: any) => {

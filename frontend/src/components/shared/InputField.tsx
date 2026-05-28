@@ -10,6 +10,8 @@ type InputFieldProps = {
   required?: boolean
   className?: string
   rightAdornment?: React.ReactNode
+  readOnly?: boolean
+  disabled?: boolean
 }
 
 const InputField = ({
@@ -18,8 +20,11 @@ const InputField = ({
   type = 'text',
   value,
   required = true,
+  className,
   onChange,
   rightAdornment,
+  readOnly = false,
+  disabled = false,
 }: InputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const [hasValue, setHasValue] = useState(false)
@@ -31,6 +36,8 @@ const InputField = ({
         type={type}
         value={value}
         required={required}
+        readOnly={readOnly}
+        disabled={disabled}
         onChange={(e) => {
           onChange?.(e.target.value)
           setHasValue(e.target.value !== '')
@@ -42,13 +49,10 @@ const InputField = ({
         }}
         name={name}
         placeholder=" "
+        className={className}
         style={rightAdornment ? { paddingRight: "2.5rem" } : undefined}
       />
-      <label
-        htmlFor={name}
-        className="labelline"
-        style={{ backgroundColor: isFloated ? '#fff' : 'transparent' }}
-      >
+      <label htmlFor={name} className={`labelline ${isFloated ? 'is-floated' : ''}`}>
         {label}
       </label>
       {rightAdornment && (

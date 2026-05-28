@@ -11,8 +11,12 @@ import { logger } from '../utils/logger';
 import { getPaginationParams, buildPaginatedResult, PaginationOptions } from '../utils/pagination';
 
 const UPLOAD_DIR = path.resolve(process.cwd(), 'upload', 'submissions');
-const ALLOWED_MIMETYPES = ['application/pdf'];
-const ALLOWED_EXTENSIONS = ['.pdf'];
+const ALLOWED_MIMETYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword'
+];
+const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.doc'];
 
 export const submissionService = (app: FastifyInstance) => {
   const repo = submissionRepository(app);
@@ -27,10 +31,10 @@ export const submissionService = (app: FastifyInstance) => {
     const fileExt = path.extname(file.filename || '').toLowerCase();
 
     if (!ALLOWED_MIMETYPES.includes(fileMimeType) && !ALLOWED_EXTENSIONS.includes(fileExt)) {
-      throw new Error('Only PDF files are allowed');
+      throw new Error('Only PDF and Word documents are allowed');
     }
 
-    const storedName = `${randomToken(12)}.pdf`;
+    const storedName = `${randomToken(12)}${fileExt || '.pdf'}`;
     const filePath = path.join(UPLOAD_DIR, storedName);
     const fileStream = file?.file ?? (file?.buffer ? Readable.from(file.buffer) : null);
 
@@ -44,7 +48,7 @@ export const submissionService = (app: FastifyInstance) => {
       const record = await repo.addSubmission({
         originalName: file.filename,
         storedName,
-        mimeType: fileMimeType || 'application/pdf',
+        mimeType: fileMimeType || 'application/octet-stream',
         size: stats.size,
         path: filePath,
         semester: meta.semester,

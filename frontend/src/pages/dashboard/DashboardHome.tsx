@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { useUploadProjectModal } from "../dashboard";
 import { FiFolder, FiCheckSquare, FiAlertTriangle, FiShield, FiFileText, FiActivity, FiUpload, FiList } from "react-icons/fi";
 import type { IconType } from "react-icons";
@@ -26,16 +27,16 @@ const systemOverview = [
   { label: "Version", value: "1.2.0", valueClass: "text-slate-500" },
 ];
 
-const container = {
+const container: Variants = {
   hidden: {},
   show: {
     transition: { staggerChildren: 0.12 },
   },
 };
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } },
 };
 
 const DashboardHome = () => {
@@ -91,7 +92,7 @@ const DashboardHome = () => {
               <motion.button
                 key={action.label}
                 type="button"
-                className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-left text-slate-700 hover:bg-slate-50"
+                className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-left text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 dark:hover:text-white"
                 variants={fadeUp}
                 onClick={() => handleQuickAction(action.label)}
               >
